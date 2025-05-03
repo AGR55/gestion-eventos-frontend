@@ -10,7 +10,7 @@ export const MainSection = () => {
       <div className="w-full relative">
         <Image
           alt="Main Image"
-          src="/main.png"
+          src="/main.webp"
           width={0}
           height={0}
           sizes="100vw"

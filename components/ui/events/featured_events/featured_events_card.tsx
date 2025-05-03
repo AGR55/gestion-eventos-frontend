@@ -19,7 +19,7 @@ export const FeaturedEventsCard = ({ key, event }: { key?: string, event: Event 
 
       <div className="absolute bottom-0 left-0 right-0 p-4">
         <div className="flex flex-col gap-1">
-          <Chip variant="filled" color="blue" size="sm">
+          <Chip variant="filled" color="blue" size="sm" className="w-max mb-1">
             {event.state}
           </Chip>
 
