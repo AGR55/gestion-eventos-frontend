@@ -1,8 +1,5 @@
-import Image from "next/image"
-import { CategoryButton } from "./category_buttons"
-import { categories } from "@/test-data/categories"
-import { SearchBar } from "./search_bar"
-
+import Image from "next/image";
+import { SearchBar } from "./search_bar";
 
 export const MainSection = () => {
   return (
@@ -22,7 +19,7 @@ export const MainSection = () => {
           <div className="relative">
             <h1
               className="relative z-10 text-white font-bold text-5xl"
-              style={{ textShadow: '0 0 10px #C9554E, 0 0 20px #C9554E' }}
+              style={{ textShadow: "0 0 10px #C9554E, 0 0 20px #C9554E" }}
             >
               Discover Amazing Events
             </h1>
@@ -30,19 +27,9 @@ export const MainSection = () => {
           <div className="z-20">
             <SearchBar />
           </div>
-          <div className="flex flex-row z-20">
-            {categories.map((cat) => (
-              <div key={cat.label}>
-                <CategoryButton>
-                  {cat.icon && <cat.icon />}
-                  <span>{cat.label}</span>
-                </CategoryButton>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-transparent from-60% to-white dark:to-[#111E27]"></div>
     </div>
-  )
-}
+  );
+};

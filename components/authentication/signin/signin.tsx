@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { Button } from "../../button";
+import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
@@ -10,14 +10,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../form";
-import { Input } from "../../input";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
-import { SocialButton } from "../social_buttons/social_buttons";
-import { Checkbox } from "../../checkbox";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { SocialButton } from "@/components/authentication/social_buttons/social_buttons";
+import { Checkbox } from "@/components/ui/checkbox";
 import { z } from "zod";
 import { signinSchema } from "@/lib/validations/auth";
+import { motion } from "framer-motion";
 
 type SigninFormValues = z.infer<typeof signinSchema>;
 
@@ -39,23 +40,30 @@ export const SignInForm = () => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <motion.form
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-5"
+      >
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-gray-400">
-                Correo Electrónico / Usuario
+              <FormLabel className="text-gray-300 font-medium mb-1.5 flex items-center">
+                <Mail size={16} className="mr-2 text-cyan-400" />
+                Correo Electrónico
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Introduce tu Correo Electrónico"
-                  className="focus-visible:ring-cyan-500 text-white h-12"
+                  placeholder="tu.email@ejemplo.com"
+                  className="bg-[#0F1A24] border-gray-700 focus-visible:ring-cyan-500 focus-visible:border-cyan-500 text-white h-12 pl-4"
                   {...field}
                 />
               </FormControl>
-              <FormMessage className="text-red-400" />
+              <FormMessage className="text-red-400 text-sm mt-1" />
             </FormItem>
           )}
         />
@@ -65,30 +73,33 @@ export const SignInForm = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-gray-400">Contraseña</FormLabel>
+              <FormLabel className="text-gray-300 font-medium mb-1.5 flex items-center">
+                <Lock size={16} className="mr-2 text-cyan-400" />
+                Contraseña
+              </FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Introduce tu Contraseña"
-                    className="focus-visible:ring-cyan-500 text-white pr-10 h-12"
+                    placeholder="••••••••"
+                    className="bg-[#0F1A24] border-gray-700 focus-visible:ring-cyan-500 focus-visible:border-cyan-500 text-white h-12 pr-10 pl-4"
                     {...field}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 cursor-pointer"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 transition-colors"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </FormControl>
-              <FormMessage className="text-red-400" />
+              <FormMessage className="text-red-400 text-sm mt-1" />
             </FormItem>
           )}
         />
 
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center pt-1">
           <FormField
             control={form.control}
             name="rememberMe"
@@ -112,30 +123,28 @@ export const SignInForm = () => {
             href="#"
             className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
           >
-            ¿Olvidaste la contraseña?
+            ¿Olvidaste tu contraseña?
           </a>
         </div>
 
         <Button
           type="submit"
-          className="w-full bg-gradient-to-r from-cyan-500 to-cyan-400 hover:from-cyan-600 hover:to-cyan-500 text-black font-medium py-2 cursor-pointer transition-colors duration-200 ease-in-out"
+          className="w-full bg-gradient-to-r from-cyan-500 to-cyan-400 hover:from-cyan-600 hover:to-cyan-500 text-black font-medium py-6 h-12 rounded-lg shadow-lg shadow-cyan-500/20 transition-all duration-200 mt-6"
         >
           Iniciar Sesión
         </Button>
 
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center my-6">
           <div className="flex-grow h-px bg-gray-800"></div>
-          <span className="px-2 text-gray-400 text-sm select-none my-3">
-            o continúa con
-          </span>
+          <span className="px-4 text-gray-400 text-sm">o continúa con</span>
           <div className="flex-grow h-px bg-gray-800"></div>
         </div>
 
         <div className="flex flex-col gap-4">
-          <SocialButton icon="google" label="CONTINUAR CON GOOGLE" />
-          <SocialButton icon="facebook" label="CONTINUAR CON FACEBOOK" />
+          <SocialButton icon="google" label="GOOGLE" />
+          <SocialButton icon="facebook" label="FACEBOOK" />
         </div>
-      </form>
+      </motion.form>
     </Form>
   );
 };

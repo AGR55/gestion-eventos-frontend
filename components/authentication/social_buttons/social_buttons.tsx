@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { FacebookIcon, GoogleIcon } from "../../icons";
+import { FacebookIcon, GoogleIcon } from "@/components/ui/icons";
 
 interface SocialButtonProps {
   icon: "google" | "facebook";
