@@ -12,7 +12,7 @@ export const UpcomingEventsCard = ({ event }: { event: Event }) => {
 
   return (
     <motion.div
-      className="w-full sm:w-[480px] h-[500px] flex flex-col bg-white dark:bg-[#13212e] rounded-2xl shadow-lg overflow-hidden"
+      className="w-full h-[460px] flex flex-col bg-white dark:bg-[#13212e] rounded-2xl shadow-lg overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -25,7 +25,7 @@ export const UpcomingEventsCard = ({ event }: { event: Event }) => {
       onHoverEnd={() => setIsHovered(false)}
     >
       {/* Image section - fixed height */}
-      <div className="w-full h-[280px] relative overflow-hidden flex-shrink-0">
+      <div className="w-full h-[220px] relative overflow-hidden flex-shrink-0">
         <motion.div
           animate={{ scale: isHovered ? 1.05 : 1 }}
           transition={{ duration: 0.4 }}
@@ -36,7 +36,8 @@ export const UpcomingEventsCard = ({ event }: { event: Event }) => {
             src={event.image}
             alt={event.name}
             fill
-            sizes="(max-width: 768px) 100vw, 480px"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority
           />
         </motion.div>
 
@@ -50,8 +51,8 @@ export const UpcomingEventsCard = ({ event }: { event: Event }) => {
           >
             <span className="flex items-center gap-1">
               <Tag size={12} />
-              {Array.isArray(event.categories)
-                ? event.categories.join(", ")
+              {Array.isArray(event.categories) && event.categories.length > 0
+                ? event.categories[0]
                 : typeof event.categories === "string"
                 ? event.categories
                 : "Categoría"}
@@ -73,48 +74,46 @@ export const UpcomingEventsCard = ({ event }: { event: Event }) => {
         </div>
       </div>
 
-      {/* Content section with fixed layout */}
-      <div className="p-6 flex flex-col flex-grow">
-        <div className="flex flex-col h-[120px]">
-          {/* Title - fixed height */}
-          <h3 className="font-bold text-xl text-neutral-800 dark:text-white mb-2 line-clamp-2 h-[30px] transition-colors group-hover:text-cyan-700 dark:group-hover:text-cyan-400">
-            {event.name}
-          </h3>
+      {/* Content section with flexible layout */}
+      <div className="p-5 flex flex-col flex-grow">
+        {/* Title with controlled height */}
+        <h3 className="font-bold text-lg text-neutral-800 dark:text-white mb-2 line-clamp-2 h-[50px] transition-colors group-hover:text-cyan-700 dark:group-hover:text-cyan-400">
+          {event.name}
+        </h3>
 
-          {/* Location */}
-          <div className="flex items-center gap-1 text-neutral-600 dark:text-neutral-300 text-sm mb-3">
-            <MapPin size={16} className="text-cyan-600 dark:text-cyan-400" />
-            <span>{event.location}</span>
-          </div>
-
-          {/* Description - fixed height with line clamp */}
-          <div className="h-[40px]">
-            <p className="text-sm text-neutral-700 dark:text-neutral-300 line-clamp-2">
-              {event.description}
-            </p>
-          </div>
+        {/* Location */}
+        <div className="flex items-center gap-1 text-neutral-600 dark:text-neutral-300 text-sm mb-3">
+          <MapPin size={14} className="text-cyan-600 dark:text-cyan-400" />
+          <span className="truncate">{event.location}</span>
         </div>
 
-        <motion.div
-          className=""
-          animate={{
-            y: isHovered ? 0 : 5,
-            opacity: isHovered ? 1 : 0.9,
-          }}
-          transition={{ duration: 0.2 }}
-        >
-          <Link
-            href={`/events/${event.id}`}
-            className="w-full flex justify-center items-center py-2.5 px-4 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-medium rounded-lg transition-all duration-200 group"
-            prefetch={true}
+        {/* Description with line clamp */}
+        <p className="text-sm text-neutral-700 dark:text-neutral-300 line-clamp-3 mb-4">
+          {event.description}
+        </p>
+
+        {/* Button that stays at bottom */}
+        <div className="mt-auto">
+          <motion.div
+            animate={{
+              y: isHovered ? 0 : 5,
+              opacity: isHovered ? 1 : 0.9,
+            }}
+            transition={{ duration: 0.2 }}
           >
-            Ver detalles
-            <ArrowRight
-              className="ml-2 group-hover:translate-x-1 transition-transform"
-              size={18}
-            />
-          </Link>
-        </motion.div>
+            <Link
+              href={`/events/${event.id}`}
+              className="w-full flex justify-center items-center py-2.5 px-4 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-medium rounded-lg transition-all duration-200 group"
+              prefetch={true}
+            >
+              Ver detalles
+              <ArrowRight
+                className="ml-2 group-hover:translate-x-1 transition-transform"
+                size={18}
+              />
+            </Link>
+          </motion.div>
+        </div>
       </div>
     </motion.div>
   );

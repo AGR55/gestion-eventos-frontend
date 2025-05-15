@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { featured_events } from "@/test-data/featured_events";
@@ -11,6 +11,10 @@ export const UpcomingEventsSection = () => {
   const [canScrollRight, setCanScrollRight] = useState(true);
   const carouselRef = useRef<HTMLDivElement>(null);
   const totalSlides = featured_events.length;
+
+  // Definimos un ancho fijo para las tarjetas
+  const cardWidth = 380; // Ancho fijo de cada tarjeta en px
+  const cardGap = 16; // Espacio entre tarjetas en px
 
   const updateScrollButtons = useCallback(() => {
     if (!carouselRef.current) return;
@@ -26,30 +30,30 @@ export const UpcomingEventsSection = () => {
     } else if (isAtEnd) {
       setCurrentIndex(totalSlides - 1);
     } else {
-      const cardWidth = 480 + 16;
-      const approximate = Math.round(scrollLeft / cardWidth);
-      setCurrentIndex(Math.min(approximate, totalSlides - 1));
+      // Usamos el ancho fijo definido arriba para calcular el índice
+      const approximateIndex = Math.round(scrollLeft / (cardWidth + cardGap));
+      setCurrentIndex(Math.min(approximateIndex, totalSlides - 1));
     }
-  }, [totalSlides]);
+  }, [totalSlides, cardWidth, cardGap]);
 
   useEffect(() => {
     const carousel = carouselRef.current;
     if (carousel) {
-      carousel.addEventListener('scroll', updateScrollButtons);
+      carousel.addEventListener("scroll", updateScrollButtons);
       updateScrollButtons();
 
-      return () => carousel.removeEventListener('scroll', updateScrollButtons);
+      return () => carousel.removeEventListener("scroll", updateScrollButtons);
     }
   }, [updateScrollButtons]);
 
   const scrollToIndex = (index: number) => {
     if (carouselRef.current && index >= 0 && index < totalSlides) {
-      const card = carouselRef.current.children[index] as HTMLElement;
-      const scrollPosition = card.offsetLeft - 20;
+      // Calcular la posición con el ancho fijo en lugar de usar offsetLeft
+      const scrollPosition = index * (cardWidth + cardGap);
 
       carouselRef.current.scrollTo({
         left: scrollPosition,
-        behavior: "smooth"
+        behavior: "smooth",
       });
 
       setCurrentIndex(index);
@@ -83,11 +87,14 @@ export const UpcomingEventsSection = () => {
           `}</style>
 
           {featured_events.map((event) => (
-            <div key={event.id.toString()} className="flex-shrink-0">
+            <div
+              key={event.id.toString()}
+              className="flex-shrink-0"
+              style={{ width: `${cardWidth}px` }} // Asignamos ancho fijo a cada contenedor
+            >
               <UpcomingEventsCard event={event} />
             </div>
           ))}
-
         </div>
 
         <button
@@ -112,8 +119,9 @@ export const UpcomingEventsSection = () => {
           <button
             key={index}
             onClick={() => scrollToIndex(index)}
-            className={`w-3 h-3 rounded-full transition-colors ${currentIndex === index ? "bg-blue-600" : "bg-gray-300"
-              }`}
+            className={`w-3 h-3 rounded-full transition-colors ${
+              currentIndex === index ? "bg-blue-600" : "bg-gray-300"
+            }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}

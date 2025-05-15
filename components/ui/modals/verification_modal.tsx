@@ -10,20 +10,34 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../input-otp";
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, RefreshCw } from "lucide-react";
+import { CheckCircle2, RefreshCw, XCircle } from "lucide-react";
+import { toast } from "sonner";
 
-export function VerificationModal() {
+interface VerificationModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  email: string;
+  onVerificationSuccess: () => void;
+  onVerificationCancel: () => void;
+}
+
+export function VerificationModal({
+  open,
+  onOpenChange,
+  email,
+  onVerificationSuccess,
+  onVerificationCancel,
+}: VerificationModalProps) {
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [verificationError, setVerificationError] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [canResend, setCanResend] = useState(false);
-  const [open, setOpen] = useState(false);
   const firstInputRef = useRef(null);
 
   // Countdown timer for resend code
@@ -59,6 +73,7 @@ export function VerificationModal() {
         setIsLoading(false);
         setCountdown(60);
         setCanResend(false);
+        setVerificationError(false);
       }, 300);
     }
   }, [open]);
@@ -67,19 +82,40 @@ export function VerificationModal() {
     if (code.length !== 6) return;
 
     setIsLoading(true);
+    setVerificationError(false);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/Auth/verify-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+            code: code,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Código de verificación inválido");
+      }
 
       // Success verification
       setIsVerified(true);
       setTimeout(() => {
+        onVerificationSuccess();
         setOpen(false);
       }, 1500);
     } catch (error) {
       console.error("Verification failed:", error);
-      // Handle error - you could show an error message here
+      setVerificationError(true);
+      toast.error("Verificación fallida", {
+        description: error instanceof Error ? error.message : "Código incorrecto",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -89,15 +125,36 @@ export function VerificationModal() {
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/Auth/resend-verification`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: email,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Error al reenviar el código");
+      }
 
       // Reset code and countdown
       setCode("");
       setCountdown(60);
       setCanResend(false);
+      toast.success("Código reenviado", {
+        description: "Se ha enviado un nuevo código a tu correo electrónico",
+      });
     } catch (error) {
       console.error("Failed to resend code:", error);
+      toast.error("Error al reenviar", {
+        description: error instanceof Error ? error.message : "Inténtalo de nuevo más tarde",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -111,12 +168,7 @@ export function VerificationModal() {
   }, [code]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="cursor-pointer">
-          Registrarme
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-[#0F1A24] border-gray-800 text-white">
         <DialogHeader>
           <DialogTitle className="text-white flex items-center gap-2">
@@ -129,14 +181,23 @@ export function VerificationModal() {
                 <CheckCircle2 className="h-5 w-5 text-green-500" />
                 <span>Verificación exitosa</span>
               </motion.div>
+            ) : verificationError ? (
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="flex items-center gap-2"
+              >
+                <XCircle className="h-5 w-5 text-red-500" />
+                <span>Código incorrecto</span>
+              </motion.div>
             ) : (
-              "Verificación de registro"
+              "Verificación de correo"
             )}
           </DialogTitle>
           <DialogDescription className="text-gray-400">
             {isVerified
               ? "Tu cuenta ha sido verificada correctamente."
-              : "Hemos enviado un código de 6 dígitos a tu correo."}
+              : `Hemos enviado un código de 6 dígitos a ${email}`}
           </DialogDescription>
         </DialogHeader>
 
@@ -161,27 +222,27 @@ export function VerificationModal() {
                     <InputOTPSlot
                       ref={firstInputRef}
                       index={0}
-                      className="bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl"
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
                     />
                     <InputOTPSlot
                       index={1}
-                      className="bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl"
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
                     />
                     <InputOTPSlot
                       index={2}
-                      className="bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl"
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
                     />
                     <InputOTPSlot
                       index={3}
-                      className="bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl"
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
                     />
                     <InputOTPSlot
                       index={4}
-                      className="bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl"
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
                     />
                     <InputOTPSlot
                       index={5}
-                      className="bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl"
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
                     />
                   </InputOTPGroup>
                 </InputOTP>
@@ -208,16 +269,15 @@ export function VerificationModal() {
         <DialogFooter className="justify-end mt-2">
           {!isVerified && (
             <>
-              <DialogClose asChild>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800"
-                  disabled={isLoading}
-                >
-                  Cancelar
-                </Button>
-              </DialogClose>
+              <Button
+                type="button"
+                variant="outline"
+                className="border-gray-700 text-gray-300 hover:bg-gray-800"
+                disabled={isLoading}
+                onClick={onVerificationCancel}
+              >
+                Cancelar
+              </Button>
               <Button
                 type="button"
                 onClick={handleVerify}
@@ -239,14 +299,13 @@ export function VerificationModal() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              <DialogClose asChild>
-                <Button
-                  type="button"
-                  className="bg-gradient-to-r from-green-500 to-green-400 hover:from-green-600 hover:to-green-500 text-black"
-                >
-                  Continuar
-                </Button>
-              </DialogClose>
+              <Button
+                type="button"
+                className="bg-gradient-to-r from-green-500 to-green-400 hover:from-green-600 hover:to-green-500 text-black"
+                onClick={() => onOpenChange(false)}
+              >
+                Continuar
+              </Button>
             </motion.div>
           )}
         </DialogFooter>
