@@ -216,7 +216,7 @@ export default function EventsPage() {
         animate="visible"
         variants={fadeIn}
       >
-        <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text mb-6 mt-16">
+        <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text mb-6 mt-20">
           Descubre Eventos Increíbles
         </h1>
         <p className="text-lg text-gray-400 max-w-3xl mx-auto mb-10">
@@ -427,7 +427,7 @@ export default function EventsPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center mt-12">
+              <div className="flex justify-center mt-20">
                 <div className="flex items-center gap-2">
                   <Button
                     variant="outline"

@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -78,7 +77,7 @@ export function VerificationModal({
     }
   }, [open]);
 
-  const handleVerify = async () => {
+  const handleVerify = useCallback(async () => {
     if (code.length !== 6) return;
 
     setIsLoading(true);
@@ -108,7 +107,7 @@ export function VerificationModal({
       setIsVerified(true);
       setTimeout(() => {
         onVerificationSuccess();
-        setOpen(false);
+        onOpenChange(false);
       }, 1500);
     } catch (error) {
       console.error("Verification failed:", error);
@@ -119,7 +118,7 @@ export function VerificationModal({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [code, email, onVerificationSuccess, onOpenChange]);
 
   const handleResendCode = async () => {
     setIsLoading(true);
@@ -165,7 +164,7 @@ export function VerificationModal({
     if (code.length === 6) {
       handleVerify();
     }
-  }, [code]);
+  }, [code, handleVerify]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

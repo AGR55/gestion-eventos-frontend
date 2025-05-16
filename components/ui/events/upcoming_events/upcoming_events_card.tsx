@@ -1,7 +1,7 @@
 "use client";
 
 import { Event } from "@/types/types";
-import { ArrowRight, Calendar, MapPin, Tag, Clock } from "lucide-react";
+import { ArrowRight, Calendar, MapPin, Tag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";

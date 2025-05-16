@@ -113,7 +113,7 @@ export default function ContactPage() {
           variants={fadeIn}
           className="text-center"
         >
-          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text mb-6 mt-12">
+          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text mb-6 mt-20">
             Ponte en Contacto
           </h1>
           <p className="text-lg md:text-xl text-gray-400 max-w-3xl mx-auto mb-10">

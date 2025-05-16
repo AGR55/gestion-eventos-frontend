@@ -11,12 +11,10 @@ import {
   Users,
   Share2,
   Heart,
-  Tag,
   ArrowLeft,
   ChevronRight,
   Ticket,
   CreditCard,
-  ChevronDown,
   Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +31,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 
 // Simulación de datos de evento basados en el ID
-const getMockEvent = (id: string) => {
+const getMockEvent = (id: number) => {
   const events = [
     {
       id: 1,
@@ -191,16 +189,6 @@ const fadeIn = {
   },
 };
 
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
 export default function EventDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -214,7 +202,7 @@ export default function EventDetailPage() {
   useEffect(() => {
     if (params.id) {
       // En una aplicación real, aquí harías un fetch a tu API
-      const fetchedEvent = getMockEvent(params.id as string);
+      const fetchedEvent = getMockEvent(Number(params.id));
       setEvent(fetchedEvent);
       setActiveImage(fetchedEvent.image);
       setLoading(false);
