@@ -21,7 +21,7 @@ export const MainSection = () => {
               className="relative z-10 text-white font-bold text-5xl"
               style={{ textShadow: "0 0 10px #C9554E, 0 0 20px #C9554E" }}
             >
-              Discover Amazing Events
+              Descubre eventos maravillosos
             </h1>
           </div>
           <div className="z-20">
@@ -29,6 +29,8 @@ export const MainSection = () => {
           </div>
         </div>
       </div>
+      <div className="absolute inset-0 bg-gradient-to-l from-transparent from-60% to-white dark:to-[#111E27]"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent from-60% to-white dark:to-[#111E27]"></div>
       <div className="absolute inset-0 bg-gradient-to-b from-transparent from-60% to-white dark:to-[#111E27]"></div>
     </div>
   );

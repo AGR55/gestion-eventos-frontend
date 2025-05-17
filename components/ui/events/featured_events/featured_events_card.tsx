@@ -89,7 +89,7 @@ export const FeaturedEventsCard = ({ event }: { event: Event }) => {
             transition={{ duration: 0.2 }}
           >
             <Link
-              href={`/eventos/${event.id}`}
+              href={`/events/${event.id}`}
               className="inline-flex items-center gap-1 text-cyan-400 hover:text-cyan-300 text-sm font-medium group/link"
             >
               Ver detalles

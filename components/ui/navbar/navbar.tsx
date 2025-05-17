@@ -10,23 +10,24 @@ export const Navbar = () => {
   const pathname = usePathname();
 
   return (
-    <nav
-      className="z-50 fixed top-4 left-4 right-4 py-3 px-6 
-                   bg-white/20 dark:bg-slate-900/50 backdrop-blur-xl 
-                   border border-white/20 dark:border-slate-700/30
-                   rounded-full shadow-lg shadow-black/5 dark:shadow-white/5
-                   transition-all duration-300"
-    >
-      <div
-        className="absolute left-6 top-1/2 transform -translate-y-1/2 text-2xl font-light cursor-pointer"
-        onClick={() => (window.location.href = "/")}
+    <div className="w-full flex justify-center fixed top-4 z-50">
+      <nav
+        className="py-3 px-6 
+                  bg-white/30 dark:bg-slate-900/60 backdrop-blur-3xl 
+                  border border-white/20 dark:border-slate-700/30
+                  rounded-full shadow-lg shadow-black/5 dark:shadow-white/5
+                  transition-all duration-300
+                  inline-flex items-center gap-6"
       >
-        <span className="font-extrabold text-white">E-VENT</span>
-        <span className="text-white"> HORIZON</span>
-      </div>
+        <div
+          className="text-2xl font-light cursor-pointer flex items-center justify-center"
+          onClick={() => (window.location.href = "/")}
+        >
+          <span className="font-extrabold text-white mr-2">E-VENT</span>
+          <span className="text-white"> HORIZON</span>
+        </div>
 
-      <div className="flex justify-center items-center w-full">
-        <div className="flex space-x-4 justify-center items-center">
+        <div className="flex space-x-4 items-center">
           {[
             { href: "/", label: "Home" },
             { href: "/events", label: "Events" },
@@ -38,33 +39,36 @@ export const Navbar = () => {
               href={link.href}
               className={`px-3 py-1 rounded-full transition-all ${
                 pathname === link.href
-                  ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 font-medium"
-                  : "text-gray-700 dark:text-gray-200 hover:text-indigo-600 hover:bg-indigo-500/5 dark:hover:text-indigo-300"
+                  ? "bg-cyan-500/10 text-cyan-500 dark:text-cyan-300 font-medium"
+                  : "text-gray-200 hover:text-cyan-400 hover:bg-cyan-500/10 transition-colors"
               }`}
             >
               {link.label}
             </Link>
           ))}
         </div>
-      </div>
-      <div className="absolute flex items-center justify-center right-[72px] top-1/2 transform -translate-y-1/2 w-9 h-9">
-        <ModeToggle />
-      </div>
-      <div className="absolute right-6 top-1/2 transform -translate-y-1/2 flex items-center justify-center w-9 h-9">
-        <Avatar
-          className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-white/30 dark:ring-slate-700/40 transition-all hover:ring-indigo-400 dark:hover:ring-indigo-500 cursor-pointer"
-          onClick={() => (window.location.href = "/auth")}
-        >
-          <AvatarImage
-            className="rounded-full w-full h-full object-cover"
-            src="https://github.com/shadcn.png"
-            alt="@shadcn"
-          />
-          <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
-            CN
-          </AvatarFallback>
-        </Avatar>
-      </div>
-    </nav>
+
+        {/* Controls */}
+        <div className="flex items-center gap-3">
+          {/* Theme Toggle */}
+          <ModeToggle />
+
+          {/* Avatar */}
+          <Avatar
+            className="h-9 w-9 rounded-full overflow-hidden ring-2 ring-white/30 dark:ring-slate-700/40 transition-all hover:ring-cyan-400 dark:hover:ring-cyan-500 cursor-pointer"
+            onClick={() => (window.location.href = "/auth")}
+          >
+            <AvatarImage
+              className="rounded-full w-full h-full object-cover"
+              src="https://github.com/shadcn.png"
+              alt="@shadcn"
+            />
+            <AvatarFallback className="bg-gradient-to-br from-cyan-500 to-blue-500 text-white">
+              CN
+            </AvatarFallback>
+          </Avatar>
+        </div>
+      </nav>
+    </div>
   );
 };

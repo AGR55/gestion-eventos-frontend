@@ -145,11 +145,9 @@ export default function EventsPage() {
 
   const eventsPerPage = 6;
 
-  // Filter events based on selected filters
   useEffect(() => {
     let result = mockEvents;
 
-    // Filter by search query
     if (searchQuery) {
       result = result.filter(
         (event) =>
@@ -158,7 +156,6 @@ export default function EventsPage() {
       );
     }
 
-    // Filter by category
     if (selectedCategory !== "Todos") {
       result = result.filter((event) => {
         const categories = Array.isArray(event.categories)
@@ -168,25 +165,19 @@ export default function EventsPage() {
       });
     }
 
-    // Filter by location
     if (selectedLocation !== "Todas") {
       result = result.filter((event) =>
         event.location.includes(selectedLocation)
       );
     }
 
-    // Filter by date
-    // Add date filtering logic if needed
-
     setFilteredEvents(result);
 
-    // Get featured events
     setFeaturedEvents(
       mockEvents.filter((event) => event.state === "Destacado")
     );
   }, [searchQuery, selectedCategory, selectedLocation, dateFilter]);
 
-  // Calculate pagination
   const indexOfLastEvent = currentPage * eventsPerPage;
   const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
   const currentEvents = filteredEvents.slice(
@@ -195,10 +186,8 @@ export default function EventsPage() {
   );
   const totalPages = Math.ceil(filteredEvents.length / eventsPerPage);
 
-  // Change page
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
-  // Reset filters
   const resetFilters = () => {
     setSearchQuery("");
     setSelectedCategory("Todos");
@@ -209,7 +198,6 @@ export default function EventsPage() {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-7xl">
-      {/* Hero Section */}
       <motion.section
         className="mb-16 text-center"
         initial="hidden"
@@ -225,7 +213,6 @@ export default function EventsPage() {
         </p>
       </motion.section>
 
-      {/* Search & Filters Section */}
       <motion.section
         className="mb-12"
         initial="hidden"
@@ -336,7 +323,7 @@ export default function EventsPage() {
             </Button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="flex justify-start gap-6">
             {featuredEvents.map((event) => (
               <FeaturedEventsCard key={event.id} event={event} />
             ))}

@@ -276,28 +276,33 @@ export default function AboutPage() {
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
           variants={staggerChildren}
-          className="grid md:grid-cols-4 gap-8"
+          className="grid md:grid-cols-5 gap-6"
         >
           {[
             {
-              name: "Alejandra Moreno",
-              position: "CEO & Fundadora",
-              image: "/images/team-1.jpg",
+              name: "Javier Leiva Suarez",
+              position: "CEO & Fundador",
+              image: "/images/founders/Javier.webp",
             },
             {
-              name: "Carlos Vega",
+              name: "Adriano Gonzalez Reyes",
               position: "CTO",
-              image: "/images/team-2.jpg",
+              image: "/images/founders/Adriano.webp",
             },
             {
-              name: "Sofia Blanco",
-              position: "Directora de Diseño",
-              image: "/images/team-3.jpg",
+              name: "Hanssel Carrillo Vazquez",
+              position: "Director de Diseño",
+              image: "/images/founders/Hanssel.webp",
             },
             {
-              name: "Diego Fuentes",
-              position: "Jefe de Operaciones",
-              image: "/images/team-4.jpg",
+              name: "Hayla Lorena Milanes Millan",
+              position: "Jefa de Operaciones",
+              image: "/images/founders/Hayla.webp",
+            },
+            {
+              name: "Ismaday Vazquez",
+              position: "Coordinadora de Eventos",
+              image: "/images/founders/Ismaday.webp",
             },
           ].map((member, index) => (
             <motion.div key={index} variants={fadeIn} className="group">
