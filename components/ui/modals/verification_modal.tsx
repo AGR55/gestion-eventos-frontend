@@ -84,26 +84,19 @@ export function VerificationModal({
     setVerificationError(false);
 
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/Auth/verify-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email,
-            code: code,
-          }),
-        }
-      );
+      const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/Auth/verify`);
+      url.searchParams.append("email", email);
+      url.searchParams.append("token", code);
+
+      const response = await fetch(url.toString(), {
+        method: "POST",
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Código de verificación inválido");
       }
 
-      // Success verification
       setIsVerified(true);
       setTimeout(() => {
         onVerificationSuccess();
@@ -113,7 +106,8 @@ export function VerificationModal({
       console.error("Verification failed:", error);
       setVerificationError(true);
       toast.error("Verificación fallida", {
-        description: error instanceof Error ? error.message : "Código incorrecto",
+        description:
+          error instanceof Error ? error.message : "Código incorrecto",
       });
     } finally {
       setIsLoading(false);
@@ -152,7 +146,10 @@ export function VerificationModal({
     } catch (error) {
       console.error("Failed to resend code:", error);
       toast.error("Error al reenviar", {
-        description: error instanceof Error ? error.message : "Inténtalo de nuevo más tarde",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Inténtalo de nuevo más tarde",
       });
     } finally {
       setIsLoading(false);
@@ -221,27 +218,39 @@ export function VerificationModal({
                     <InputOTPSlot
                       ref={firstInputRef}
                       index={0}
-                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${
+                        verificationError ? "border-red-500" : ""
+                      }`}
                     />
                     <InputOTPSlot
                       index={1}
-                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${
+                        verificationError ? "border-red-500" : ""
+                      }`}
                     />
                     <InputOTPSlot
                       index={2}
-                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${
+                        verificationError ? "border-red-500" : ""
+                      }`}
                     />
                     <InputOTPSlot
                       index={3}
-                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${
+                        verificationError ? "border-red-500" : ""
+                      }`}
                     />
                     <InputOTPSlot
                       index={4}
-                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${
+                        verificationError ? "border-red-500" : ""
+                      }`}
                     />
                     <InputOTPSlot
                       index={5}
-                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${verificationError ? 'border-red-500' : ''}`}
+                      className={`bg-[#1A2836] border-gray-700 text-white w-12 h-12 text-xl ${
+                        verificationError ? "border-red-500" : ""
+                      }`}
                     />
                   </InputOTPGroup>
                 </InputOTP>

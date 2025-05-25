@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 //import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { ThemeProvider } from "@/components/theme_provider";
 import { Navbar } from "@/components/ui/navbar/navbar";
 import { Footer } from "@/components/ui/footer/footer";
@@ -31,16 +32,18 @@ export default function RootLayout({
           /*${jakarta.variable}*/ ""
         } antialiased font-sans`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Navbar />
-          <main className="min-h-screen">{children}</main>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Navbar />
+            {children}
+          </ThemeProvider>
           <Footer />
-        </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

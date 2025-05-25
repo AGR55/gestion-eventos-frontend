@@ -29,9 +29,9 @@ export const MainSection = () => {
           </div>
         </div>
       </div>
-      <div className="absolute inset-0 bg-gradient-to-l from-transparent from-60% to-white dark:to-[#111E27]"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent from-60% to-white dark:to-[#111E27]"></div>
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent from-60% to-white dark:to-[#111E27]"></div>
+      <div className="absolute inset-0 bg-gradient-to-l from-transparent from-60% to-white dark:to-gray-900"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent from-60% to-white dark:to-gray-800"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent from-60% to-white dark:to-gray-800"></div>
     </div>
   );
 };

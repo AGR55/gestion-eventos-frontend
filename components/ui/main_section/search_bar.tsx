@@ -14,47 +14,115 @@ import {
   Utensils,
   Laptop,
   Building,
+  Clock,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "../button";
 import { Input } from "../input";
 import { motion, AnimatePresence } from "framer-motion";
-import { CategoryButton } from "./category_buttons";
 
 const EXAMPLE_SUGGESTIONS = [
   {
     id: 1,
-    name: "Concierto de Jazz",
+    name: "Concierto de Jazz en Malecón",
     type: "event",
-    icon: <Calendar size={14} />,
+    icon: <Music size={16} />,
+    location: "La Habana",
+    date: "15 Jun",
+    trending: true,
   },
   {
     id: 2,
-    name: "Festival de Cine",
+    name: "Festival de Cine Independiente",
     type: "event",
-    icon: <Calendar size={14} />,
+    icon: <Calendar size={16} />,
+    location: "Santiago",
+    date: "22 Jun",
+    trending: false,
   },
-  { id: 3, name: "Madrid", type: "location", icon: <MapPin size={14} /> },
-  { id: 4, name: "Barcelona", type: "location", icon: <MapPin size={14} /> },
-  { id: 5, name: "Música", type: "category", icon: <Tag size={14} /> },
-  { id: 6, name: "Gastronomía", type: "category", icon: <Tag size={14} /> },
+  {
+    id: 3,
+    name: "Teatro Nacional",
+    type: "location",
+    icon: <MapPin size={16} />,
+    location: "La Habana",
+    events: "12 eventos",
+  },
+  {
+    id: 4,
+    name: "Casa de la Música",
+    type: "location",
+    icon: <MapPin size={16} />,
+    location: "Trinidad",
+    events: "8 eventos",
+  },
+  {
+    id: 5,
+    name: "Música",
+    type: "category",
+    icon: <Music size={16} />,
+    count: "45 eventos",
+  },
+  {
+    id: 6,
+    name: "Gastronomía",
+    type: "category",
+    icon: <Utensils size={16} />,
+    count: "23 eventos",
+  },
 ];
 
-// Create a categories array with icons
 const CATEGORIES = [
-  { name: "Eventos", icon: <Calendar size={16} /> },
-  { name: "Lugares", icon: <Building size={16} /> },
-  { name: "Música", icon: <Music size={16} /> },
-  { name: "Arte", icon: <Palette size={16} /> },
-  { name: "Deportes", icon: <Trophy size={16} /> },
-  { name: "Gastronomía", icon: <Utensils size={16} /> },
-  { name: "Tecnología", icon: <Laptop size={16} /> },
+  {
+    name: "Todos",
+    icon: <Search size={16} />,
+    gradient: "from-gray-500/20 to-gray-600/20",
+    color: "text-gray-400",
+  },
+  {
+    name: "Música",
+    icon: <Music size={16} />,
+    gradient: "from-red-500/20 to-pink-500/20",
+    color: "text-red-400",
+  },
+  {
+    name: "Arte",
+    icon: <Palette size={16} />,
+    gradient: "from-purple-500/20 to-indigo-500/20",
+    color: "text-purple-400",
+  },
+  {
+    name: "Gastronomía",
+    icon: <Utensils size={16} />,
+    gradient: "from-orange-500/20 to-red-500/20",
+    color: "text-orange-400",
+  },
+  {
+    name: "Tecnología",
+    icon: <Laptop size={16} />,
+    gradient: "from-cyan-500/20 to-blue-500/20",
+    color: "text-cyan-400",
+  },
+  {
+    name: "Deportes",
+    icon: <Trophy size={16} />,
+    gradient: "from-emerald-500/20 to-teal-500/20",
+    color: "text-emerald-400",
+  },
+];
+
+const QUICK_SEARCHES = [
+  "Eventos este fin de semana",
+  "Conciertos en La Habana",
+  "Festival de arte",
+  "Eventos gratuitos",
 ];
 
 export const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("Todos");
   const [suggestions, setSuggestions] = useState<typeof EXAMPLE_SUGGESTIONS>(
     []
   );
@@ -73,10 +141,13 @@ export const SearchBar = () => {
         setIsLoading(false);
       }, 300);
       return () => clearTimeout(timer);
+    } else if (isFocused && searchTerm.length === 0) {
+      // Mostrar sugerencias populares cuando está enfocado pero vacío
+      setSuggestions(EXAMPLE_SUGGESTIONS.slice(0, 4));
     } else {
       setSuggestions([]);
     }
-  }, [searchTerm]);
+  }, [searchTerm, isFocused]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -96,20 +167,22 @@ export const SearchBar = () => {
     if (!searchTerm) return;
 
     console.log(
-      `Searching for: ${searchTerm}${
-        selectedCategory ? ` in ${selectedCategory}` : ""
-      }`
+      `Searching for: ${searchTerm} in category: ${selectedCategory}`
     );
 
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
+      setIsFocused(false);
     }, 800);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleSearch();
+    }
+    if (e.key === "Escape") {
+      setIsFocused(false);
     }
   };
 
@@ -118,9 +191,7 @@ export const SearchBar = () => {
     inputRef.current?.focus();
   };
 
-  const handleSuggestionClick = (
-    suggestion: (typeof EXAMPLE_SUGGESTIONS)[0]
-  ) => {
+  const handleSuggestionClick = (suggestion: (typeof EXAMPLE_SUGGESTIONS)[0]) => {
     setSearchTerm(suggestion.name);
     if (suggestion.type === "category") {
       setSelectedCategory(suggestion.name);
@@ -129,131 +200,231 @@ export const SearchBar = () => {
     handleSearch();
   };
 
+  const handleQuickSearch = (query: string) => {
+    setSearchTerm(query);
+    setIsFocused(false);
+    setTimeout(() => handleSearch(), 100);
+  };
+
   return (
-    <div
-      ref={containerRef}
-      className="relative flex flex-col items-center justify-center"
-    >
+    <div ref={containerRef} className="relative w-full max-w-2xl mx-auto">
+      {/* Barra de búsqueda principal */}
       <motion.div
-        className="p-1 bg-gradient-to-r from-[#C9554E] to-[#3AB5B8] drop-shadow-2xl rounded-2xl w-96 max-w-full flex flex-row gap-1"
-        initial={{ opacity: 0.9, y: 5 }}
-        animate={{
-          opacity: 1,
-          y: 0,
-          scale: isFocused ? 1.02 : 1,
-        }}
-        transition={{ duration: 0.2 }}
+        className="relative"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       >
-        <div className="relative flex-grow">
-          <Input
-            ref={inputRef}
-            placeholder="Busca eventos, lugares o categorías"
-            className="rounded-xl !bg-white shadow-border w-full text-black pl-3 pr-8 py-2 h-10 focus-visible:ring-2 focus-visible:ring-cyan-400 transition-all"
-            type="text"
-            name="search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => setIsFocused(true)}
-            onKeyDown={handleKeyDown}
-            autoComplete="off"
-          />
+        <div
+          className={`relative bg-black/40 backdrop-blur-xl border transition-all duration-300 rounded-2xl overflow-hidden ${
+            isFocused
+              ? "border-cyan-500/50 shadow-2xl shadow-cyan-500/20"
+              : "border-gray-700/50 hover:border-gray-600/50"
+          }`}
+        >
+          <div className="flex items-center">
+            <div className="flex-1 relative">
+              <Input
+                ref={inputRef}
+                placeholder="Busca eventos, lugares o experiencias únicas..."
+                className="bg-transparent border-0 text-white placeholder:text-gray-400 text-lg px-6 py-4 h-14 focus-visible:ring-0 focus-visible:ring-offset-0"
+                type="text"
+                name="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={() => setIsFocused(true)}
+                onKeyDown={handleKeyDown}
+                autoComplete="off"
+              />
 
-          {searchTerm && (
-            <button
-              onClick={clearSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Clear search"
+              {searchTerm && !isLoading && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  onClick={clearSearch}
+                  className="absolute right-20 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
+                  aria-label="Limpiar búsqueda"
+                >
+                  <X size={18} />
+                </motion.button>
+              )}
+            </div>
+
+            <Button
+              onClick={handleSearch}
+              disabled={isLoading}
+              className="m-2 h-10 w-10 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 border-0 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Buscar"
             >
-              <X size={16} />
-            </button>
-          )}
-        </div>
-
-        <div className="flex gap-1">
-          <Button
-            onClick={handleSearch}
-            disabled={isLoading || !searchTerm}
-            className="rounded-xl bg-gray-900/75 transition-colors hover:bg-gray-900/90 h-10 w-10 p-0 disabled:opacity-70"
-            aria-label="Search"
-          >
-            {isLoading ? (
-              <Loader2 className="text-white h-4 w-4 animate-spin" />
-            ) : (
-              <Search className="text-white h-4 w-4" />
-            )}
-          </Button>
+              {isLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <Search className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </div>
       </motion.div>
 
-      {isFocused && (
-        <motion.div
-          className="flex mt-8 px-2 overflow-x-auto pb-2 no-scrollbar"
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          {CATEGORIES.map((category) => (
-            <div
-              key={category.name}
-              onClick={() => {
-                setSelectedCategory(
-                  selectedCategory === category.name ? null : category.name
-                );
-                inputRef.current?.focus();
-              }}
-              className={`relative ${
-                selectedCategory === category.name ? "scale-105" : ""
-              }`}
-            >
-              <CategoryButton>
-                {category.icon}
-                <span className="text-xs whitespace-nowrap">
-                  {category.name}
-                </span>
-              </CategoryButton>
-              {selectedCategory === category.name && (
-                <motion.div
-                  layoutId="selected-indicator"
-                  className="absolute inset-0 border-2 border-white rounded-full pointer-events-none"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                />
-              )}
-            </div>
-          ))}
-        </motion.div>
-      )}
-
-      {/* Suggestions dropdown */}
+      {/* Categorías */}
       <AnimatePresence>
-        {isFocused && suggestions.length > 0 && (
+        {isFocused && (
           <motion.div
-            initial={{ opacity: 0, y: 10, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: "auto" }}
-            exit={{ opacity: 0, y: 10, height: 0 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 right-0 mt-16 py-2 bg-white dark:bg-gray-800 rounded-xl shadow-lg z-10 border border-white/10 backdrop-blur-md overflow-hidden"
+            className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide"
           >
-            <div className="max-h-[300px] overflow-y-auto">
-              {suggestions.map((suggestion) => (
-                <button
-                  key={suggestion.id}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100/50 dark:hover:bg-gray-700/50 flex items-center gap-2 transition-colors"
-                  onClick={() => handleSuggestionClick(suggestion)}
-                >
-                  <span className="text-cyan-500">{suggestion.icon}</span>
-                  <span className="text-sm">{suggestion.name}</span>
-                  <span className="text-xs text-gray-500 ml-auto">
-                    {suggestion.type === "event"
-                      ? "Evento"
-                      : suggestion.type === "location"
-                      ? "Lugar"
-                      : "Categoría"}
-                  </span>
-                </button>
-              ))}
-            </div>
+            {CATEGORIES.map((category, index) => (
+              <motion.button
+                key={category.name}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                onClick={() => setSelectedCategory(category.name)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                  selectedCategory === category.name
+                    ? `bg-gradient-to-r ${category.gradient} ${category.color} border border-current/30`
+                    : "bg-gray-800/50 text-gray-400 hover:bg-gray-700/50 hover:text-gray-200 border border-transparent"
+                }`}
+              >
+                {category.icon}
+                <span>{category.name}</span>
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Dropdown de sugerencias */}
+      <AnimatePresence>
+        {isFocused && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="absolute left-0 right-0 mt-2 bg-black/90 backdrop-blur-xl rounded-2xl border border-gray-700/50 shadow-2xl z-50 overflow-hidden"
+          >
+            {searchTerm.length === 0 && (
+              <>
+                {/* Búsquedas rápidas */}
+                <div className="p-6 border-b border-gray-700/50">
+                  <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                    <TrendingUp size={16} />
+                    Búsquedas populares
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {QUICK_SEARCHES.map((query, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleQuickSearch(query)}
+                        className="px-3 py-1.5 bg-gray-800/50 hover:bg-cyan-500/20 text-gray-300 hover:text-cyan-300 text-sm rounded-full transition-all duration-200 border border-gray-700/50 hover:border-cyan-500/50"
+                      >
+                        {query}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Lista de sugerencias */}
+            {suggestions.length > 0 && (
+              <div className="max-h-80 overflow-y-auto">
+                <div className="p-2">
+                  <h3 className="text-sm font-semibold text-gray-300 mb-2 px-4 py-2">
+                    {searchTerm.length > 0 ? "Resultados" : "Sugerencias"}
+                  </h3>
+                  {suggestions.map((suggestion, index) => (
+                    <motion.button
+                      key={suggestion.id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="w-full text-left px-4 py-3 hover:bg-gray-800/50 rounded-xl flex items-center gap-3 transition-all duration-200 group"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                    >
+                      <div className="flex-shrink-0 p-2 bg-gray-800/50 rounded-lg group-hover:bg-cyan-500/20 transition-colors">
+                        <span className="text-gray-400 group-hover:text-cyan-400">
+                          {suggestion.icon}
+                        </span>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-white font-medium truncate">
+                            {suggestion.name}
+                          </span>
+                          {suggestion.trending && (
+                            <span className="text-xs bg-red-500/20 text-red-400 px-2 py-0.5 rounded-full">
+                              Trending
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-4 mt-1">
+                          {"location" in suggestion && (
+                            <span className="text-sm text-gray-400 flex items-center gap-1">
+                              <MapPin size={12} />
+                              {suggestion.location}
+                            </span>
+                          )}
+                          {"date" in suggestion && (
+                            <span className="text-sm text-gray-400 flex items-center gap-1">
+                              <Clock size={12} />
+                              {suggestion.date}
+                            </span>
+                          )}
+                          {"events" in suggestion && (
+                            <span className="text-sm text-gray-400">
+                              {suggestion.events}
+                            </span>
+                          )}
+                          {"count" in suggestion && (
+                            <span className="text-sm text-gray-400">
+                              {suggestion.count}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex-shrink-0">
+                        <span className="text-xs text-gray-500 bg-gray-800/50 px-2 py-1 rounded-full">
+                          {suggestion.type === "event"
+                            ? "Evento"
+                            : suggestion.type === "location"
+                            ? "Lugar"
+                            : "Categoría"}
+                        </span>
+                      </div>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Estado de carga */}
+            {isLoading && (
+              <div className="p-8 text-center">
+                <Loader2 className="h-6 w-6 animate-spin text-cyan-400 mx-auto mb-2" />
+                <p className="text-gray-400 text-sm">Buscando eventos...</p>
+              </div>
+            )}
+
+            {/* Sin resultados */}
+            {searchTerm.length > 1 && !isLoading && suggestions.length === 0 && (
+              <div className="p-8 text-center">
+                <Search className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400 text-sm">
+                  No se encontraron resultados para "{searchTerm}"
+                </p>
+                <p className="text-gray-500 text-xs mt-1">
+                  Intenta con otros términos de búsqueda
+                </p>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>

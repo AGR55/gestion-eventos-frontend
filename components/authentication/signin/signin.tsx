@@ -20,17 +20,18 @@ import { z } from "zod";
 import { signinSchema } from "@/lib/validations/auth";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import { VerificationModal } from "@/components/ui/modals/verification_modal";
+import { signIn } from "next-auth/react";
 
 type SigninFormValues = z.infer<typeof signinSchema>;
 
 export const SignInForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [verificationModalOpen, setVerificationModalOpen] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const router = useRouter();
+  const { login, isLoading, verifyEmail } = useAuth();
 
   const form = useForm<SigninFormValues>({
     resolver: zodResolver(signinSchema),
@@ -42,107 +43,32 @@ export const SignInForm = () => {
   });
 
   async function onSubmit(data: SigninFormValues) {
-    setIsLoading(true);
-    try {
-      const loginResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/Auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: data.email,
-            password: data.password,
-          }),
-        }
-      );
+    const result = await login(data.email, data.password);
 
-      const responseData = await loginResponse.json();
-
-      if (!loginResponse.ok) {
-        if (responseData.code === "EmailNotVerified") {
-          setUnverifiedEmail(data.email);
-          setVerificationModalOpen(true);
-          toast.warning("Cuenta no verificada", {
-            description: "Por favor verifica tu correo electrónico para continuar.",
-          });
-          return;
-        }
-        
-        throw new Error(responseData.message || "Error al iniciar sesión");
-      }
-
-      localStorage.setItem("token", responseData.token);
-      
+    if (result) {
       if (data.rememberMe) {
         localStorage.setItem("rememberedEmail", data.email);
       }
-
-      toast.success("¡Inicio de sesión exitoso!", {
-        description: "Bienvenido de nuevo.",
-      });
-
       router.push("/");
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Error al iniciar sesión", {
-        description: 
-          error instanceof Error
-            ? error.message
-            : "Credenciales incorrectas o error de conexión",
-      });
-    } finally {
-      setIsLoading(false);
     }
   }
 
+  const handleSocialLogin = async (provider: string) => {
+    await signIn(provider, { callbackUrl: "/" });
+  };
+
   const handleVerificationSuccess = async () => {
-    try {
-      setIsLoading(true);
-      const formData = form.getValues();
+    const formData = form.getValues();
+    const result = await login(formData.email, formData.password);
 
-      const loginResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/Auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
-        }
-      );
-
-      if (!loginResponse.ok) {
-        throw new Error("Error al iniciar sesión automáticamente");
-      }
-
-      const loginData = await loginResponse.json();
-      localStorage.setItem("token", loginData.token);
-
-      toast.success("¡Cuenta verificada!", {
-        description: "Has iniciado sesión correctamente.",
-      });
-
+    if (result) {
       router.push("/");
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Error al iniciar sesión", {
-        description: "Por favor, intenta iniciar sesión manualmente.",
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleVerificationCancel = () => {
     setVerificationModalOpen(false);
-    toast("Verificación pendiente", {
-      description: "Necesitas verificar tu cuenta para iniciar sesión.",
-    });
+    setUnverifiedEmail("");
   };
 
   return (
@@ -278,9 +204,17 @@ export const SignInForm = () => {
             <div className="flex-grow h-px bg-gray-800"></div>
           </div>
 
-          <div className="flex flex-col gap-4">
-            <SocialButton icon="google" label="GOOGLE" />
-            <SocialButton icon="facebook" label="FACEBOOK" />
+          <div className="grid grid-cols-2 gap-3">
+            <SocialButton
+              icon="google"
+              label="GOOGLE"
+              onClick={() => handleSocialLogin("google")}
+            />
+            <SocialButton
+              icon="facebook"
+              label="FACEBOOK"
+              onClick={() => handleSocialLogin("facebook")}
+            />
           </div>
         </motion.form>
       </Form>

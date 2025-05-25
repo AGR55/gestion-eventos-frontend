@@ -21,6 +21,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { VerificationModal } from "@/components/ui/modals/verification_modal";
+import { useAuth } from "@/hooks/useAuth";
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -31,6 +32,8 @@ export const SignUpForm = () => {
   const [verificationModalOpen, setVerificationModalOpen] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
   const router = useRouter();
+
+  const { register, login } = useAuth();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -89,32 +92,12 @@ export const SignUpForm = () => {
       setIsLoading(true);
       const formData = form.getValues();
 
-      const loginResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/Auth/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password,
-          }),
-        }
-      );
+      const loginSuccess = await login(formData.email, formData.password);
 
-      if (!loginResponse.ok) {
-        throw new Error("Error al iniciar sesión automáticamente");
+      if (loginSuccess) {
+        setVerificationModalOpen(false);
+        router.push("/");
       }
-
-      const loginData = await loginResponse.json();
-      localStorage.setItem("token", loginData.token);
-
-      toast.success("¡Cuenta verificada!", {
-        description: "Has iniciado sesión correctamente.",
-      });
-
-      router.push("/");
     } catch (error) {
       console.error("Login error:", error);
       toast.error("Error al iniciar sesión", {
@@ -127,9 +110,7 @@ export const SignUpForm = () => {
 
   const handleVerificationCancel = () => {
     setVerificationModalOpen(false);
-    toast("Verificación pendiente", {
-      description: "Podrás verificar tu cuenta la próxima vez que inicies sesión.",
-    });
+    router.push("/auth/signin");
   };
 
   return (

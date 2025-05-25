@@ -8,6 +8,8 @@ export const featured_events = [
         image: "/event_1.jpeg",
         categories: ["Technology", "Networking"],
         state: "Upcoming",
+        price: 45,
+        duration: "3 hours",
     },
     {
         id: 2,
@@ -18,6 +20,8 @@ export const featured_events = [
         image: "/event_2.jpeg",
         categories: ["Art", "Exhibition"],
         state: "Upcoming",
+        price: 80,
+        duration: "3 days",
     },
     {
         id: 3,
@@ -28,6 +32,8 @@ export const featured_events = [
         image: "/event_3.jpeg",
         categories: ["Music", "Festival"],
         state: "Featured",
+        price: 120,
+        duration: "4 hours",
     },
     {
         id: 4,
@@ -38,6 +44,8 @@ export const featured_events = [
         image: "/event_1.jpeg",
         categories: ["Technology", "Networking"],
         state: "Upcoming",
+        price: 20,
+        duration: "3 hours",
     },
     {
         id: 5,
@@ -48,6 +56,8 @@ export const featured_events = [
         image: "/event_2.jpeg",
         categories: ["Art", "Exhibition"],
         state: "Upcoming",
+        price: 210,
+        duration: "5 days",
     },
     {
         id: 6,
@@ -58,5 +68,7 @@ export const featured_events = [
         image: "/event_3.jpeg",
         categories: ["Music", "Festival"],
         state: "Featured",
+        price: 50,
+        duration: "5 hours",
     },
 ]
