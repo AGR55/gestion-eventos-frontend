@@ -138,24 +138,13 @@ export default function AuthPage() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="signin" className="mt-3">
+            <TabsContent value="signin">
               <SignInForm />
             </TabsContent>
-            <TabsContent value="signup" className="mt-3">
+            <TabsContent value="signup">
               <SignUpForm />
             </TabsContent>
           </Tabs>
-
-          <p className="text-center text-gray-500 text-sm mt-8">
-            Al continuar, aceptas nuestros{" "}
-            <a href="#" className="text-cyan-400 hover:underline">
-              Términos de servicio
-            </a>{" "}
-            y{" "}
-            <a href="#" className="text-cyan-400 hover:underline">
-              Política de privacidad
-            </a>
-          </p>
         </motion.div>
       </div>
     </div>

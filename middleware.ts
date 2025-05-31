@@ -3,29 +3,51 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
-    // Si la URL es /admin y el usuario no es administrador, redirigir
     const { pathname } = req.nextUrl;
-    const userRole = req.nextauth?.token?.role;
+    const token = req.nextauth?.token;
 
-    if (pathname.startsWith("/admin") && userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
+    // Rutas que requieren ser organizador
+    if (pathname.startsWith("/organizer")) {
+      // Verificar si el usuario es organizador
+      if (!token?.isOrganizer) {
+        return NextResponse.redirect(new URL("/auth", req.url));
+      }
+    }
+
+    // Rutas que requieren autenticación básica
+    if (pathname.startsWith("/profile")) {
+      if (!token) {
+        return NextResponse.redirect(new URL("/auth", req.url));
+      }
     }
 
     return NextResponse.next();
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token, req }) => {
+        const { pathname } = req.nextUrl;
+
+        // Permitir acceso a rutas públicas
+        if (
+          !pathname.startsWith("/organizer") &&
+          !pathname.startsWith("/profile")
+        ) {
+          return true;
+        }
+
+        // Requerir token para rutas protegidas
+        return !!token;
+      },
     },
   }
 );
 
-// Especificar las rutas que requieren autenticación
 export const config = {
   matcher: [
+    "/organizer/:path*",
     "/profile/:path*",
     "/events/create",
     "/events/edit/:path*",
-    "/admin/:path*",
   ],
 };

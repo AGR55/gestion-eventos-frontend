@@ -12,8 +12,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
-import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, Briefcase } from "lucide-react";
 import { SocialButton } from "@/components/authentication/social_buttons/social_buttons";
 import { z } from "zod";
 import { signupSchema } from "@/lib/validations/auth";
@@ -42,6 +43,7 @@ export const SignUpForm = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      isOrganizer: false,
     },
   });
 
@@ -59,6 +61,7 @@ export const SignUpForm = () => {
             username: data.name,
             email: data.email,
             password: data.password,
+            beOrganizer: data.isOrganizer,
           }),
         }
       );
@@ -72,7 +75,8 @@ export const SignUpForm = () => {
       setVerificationModalOpen(true);
 
       toast("¡Registro exitoso!", {
-        description: "Por favor, verifica tu correo electrónico para continuar.",
+        description:
+          "Por favor, verifica tu correo electrónico para continuar.",
       });
     } catch (error) {
       console.error("Error:", error);
@@ -188,7 +192,11 @@ export const SignUpForm = () => {
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-300 transition-colors"
                       >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {showPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
                       </button>
                     </div>
                   </FormControl>
@@ -235,6 +243,33 @@ export const SignUpForm = () => {
             />
           </div>
 
+          {/* Nuevo campo isOrganizer */}
+          <FormField
+            control={form.control}
+            name="isOrganizer"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-700 bg-[#0F1A24] p-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="border-gray-600 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="text-gray-300 font-medium flex items-center cursor-pointer">
+                    <Briefcase size={16} className="mr-2 text-cyan-400" />
+                    Quiero ser organizador de eventos
+                  </FormLabel>
+                  <p className="text-xs text-gray-500">
+                    Podrás crear y gestionar tus propios eventos en la
+                    plataforma
+                  </p>
+                </div>
+              </FormItem>
+            )}
+          />
+
           <p className="text-xs text-gray-500 mt-2">
             La contraseña debe tener al menos 8 caracteres, una mayúscula y un
             número.
@@ -274,7 +309,7 @@ export const SignUpForm = () => {
             )}
           </Button>
 
-          <div className="flex items-center justify-center my-6">
+          <div className="flex items-center justify-center mb-3">
             <div className="flex-grow h-px bg-gray-800"></div>
             <span className="px-4 text-gray-400 text-sm">o regístrate con</span>
             <div className="flex-grow h-px bg-gray-800"></div>
@@ -285,6 +320,17 @@ export const SignUpForm = () => {
             <SocialButton icon="facebook" label="FACEBOOK" />
           </div>
         </motion.form>
+
+        <p className="text-center text-gray-500 text-sm mt-8">
+          Al continuar, aceptas nuestros{" "}
+          <a href="#" className="text-cyan-400 hover:underline">
+            Términos de servicio
+          </a>{" "}
+          y{" "}
+          <a href="#" className="text-cyan-400 hover:underline">
+            Política de privacidad
+          </a>
+        </p>
       </Form>
 
       <VerificationModal

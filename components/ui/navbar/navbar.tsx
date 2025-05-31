@@ -183,7 +183,9 @@ export const Navbar = () => {
               {/* Mobile Controls */}
               <div className="border-t border-gray-800/50 pt-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-gray-400 text-sm font-medium">Configuración</span>
+                  <span className="text-gray-400 text-sm font-medium">
+                    Configuración
+                  </span>
                   <div className="flex items-center gap-3">
                     <ModeToggle />
                     <UserAvatar />
