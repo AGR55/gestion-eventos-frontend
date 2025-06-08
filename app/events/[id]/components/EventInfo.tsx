@@ -243,7 +243,7 @@ export default function EventInfo({ event, dateInfo }: EventInfoProps) {
 
                 <div className="flex-1">
                   <h4 className="text-white font-semibold text-lg mb-2">
-                    {event.organizer?.userName || "Organizador desconocido"}
+                    {event.organizer?.userName}
                   </h4>
 
                   <p className="text-gray-400 mb-4">Organizador de eventos</p>

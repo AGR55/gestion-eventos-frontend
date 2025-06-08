@@ -2,7 +2,15 @@
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Share2, Ticket, Calendar, Clock } from "lucide-react";
+import {
+  Heart,
+  Share2,
+  Calendar,
+  Clock,
+  UserPlus,
+  UserCheck,
+  Loader2,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Event } from "@/types/types";
@@ -14,13 +22,19 @@ interface EventActionsProps {
     formattedTime: string;
     isPast: boolean;
   };
-  onAddToCart: () => void;
+  onRegistration: () => void;
+  isRegistering: boolean;
+  isRegistered: boolean;
+  isAuthenticated: boolean;
 }
 
 export default function EventActions({
   event,
   dateInfo,
-  onAddToCart,
+  onRegistration,
+  isRegistering,
+  isRegistered,
+  isAuthenticated,
 }: EventActionsProps) {
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -40,18 +54,15 @@ export default function EventActions({
       try {
         await navigator.share(shareData);
       } catch (error) {
-        // Usuario canceló o error
         console.log("Share cancelled");
       }
     } else {
-      // Fallback para navegadores que no soportan Web Share API
       await navigator.clipboard.writeText(window.location.href);
       toast.success("Enlace copiado al portapapeles");
     }
   };
 
   const addToCalendar = () => {
-    // Crear evento para calendario
     const startDate = new Date(event.date);
     const endDate = new Date(
       startDate.getTime() + event.duration * 60 * 60 * 1000
@@ -72,6 +83,58 @@ export default function EventActions({
     window.open(calendarUrl, "_blank");
     toast.success("Redirigiendo a Google Calendar");
   };
+
+  // ✨ Determinar el estado del botón de inscripción
+  const getRegistrationButtonProps = () => {
+    if (dateInfo.isPast) {
+      return {
+        disabled: true,
+        text: "Evento Finalizado",
+        icon: <Clock className="mr-2 h-5 w-5" />,
+        className: "bg-gray-600/50 text-gray-400 cursor-not-allowed",
+      };
+    }
+
+    if (!event.isPublished) {
+      return {
+        disabled: true,
+        text: "No Disponible",
+        icon: <Clock className="mr-2 h-5 w-5" />,
+        className: "bg-gray-600/50 text-gray-400 cursor-not-allowed",
+      };
+    }
+
+    if (!isAuthenticated) {
+      return {
+        disabled: false,
+        text: "Iniciar Sesión para Inscribirse",
+        icon: <UserPlus className="mr-2 h-5 w-5" />,
+        className:
+          "bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white",
+      };
+    }
+
+    if (isRegistering) {
+      return {
+        disabled: true,
+        text: "Procesando...",
+        icon: <Loader2 className="mr-2 h-5 w-5 animate-spin" />,
+        className: "bg-gray-600/50 text-gray-400 cursor-not-allowed",
+      };
+    }
+
+    if (isRegistered) {
+      return {
+        disabled: false,
+        text: "Cancelar Inscripción",
+        icon: <UserCheck className="mr-2 h-5 w-5" />,
+        className:
+          "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white",
+      };
+    }
+  };
+
+  const buttonProps = getRegistrationButtonProps();
 
   if (dateInfo.isPast) {
     return (
@@ -109,6 +172,15 @@ export default function EventActions({
           </Badge>
         )}
 
+        {isRegistered && (
+          <Badge
+            variant="outline"
+            className="bg-green-500/20 border-green-500/50 text-green-400"
+          >
+            ✓ Inscrito
+          </Badge>
+        )}
+
         <Badge
           variant={event.price > 0 ? "default" : "secondary"}
           className={`${
@@ -119,26 +191,6 @@ export default function EventActions({
         >
           {event.price > 0 ? `$${event.price} CUP` : "GRATIS"}
         </Badge>
-      </div>
-
-      {/* Botón principal de acción */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Button
-          onClick={onAddToCart}
-          disabled={!event.isPublished}
-          className={`flex-1 h-12 font-bold text-lg ${
-            !event.isPublished
-              ? "bg-gray-600/50 text-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
-          }`}
-        >
-          <Ticket className="mr-2 h-5 w-5" />
-          {!event.isPublished
-            ? "No disponible"
-            : event.price > 0
-            ? `Comprar - $${event.price}`
-            : "Inscribirse Gratis"}
-        </Button>
       </div>
 
       {/* Acciones secundarias */}
@@ -173,11 +225,21 @@ export default function EventActions({
       </div>
 
       {/* Información adicional */}
-      {event.isPublished && (
+      {event.isPublished && !dateInfo.isPast && (
         <div className="text-sm text-gray-400 space-y-1">
-          <p>✓ Confirmación instantánea</p>
-          <p>✓ Cancelación hasta 24h antes</p>
-          <p>✓ Soporte directo con el organizador</p>
+          {isRegistered ? (
+            <>
+              <p>✓ Estás inscrito a este evento</p>
+              <p>✓ Recibirás notificaciones importantes</p>
+              <p>✓ Puedes cancelar hasta 24h antes</p>
+            </>
+          ) : (
+            <>
+              <p>✓ Confirmación instantánea</p>
+              <p>✓ Cancelación hasta 24h antes</p>
+              <p>✓ Soporte directo con el organizador</p>
+            </>
+          )}
         </div>
       )}
     </div>

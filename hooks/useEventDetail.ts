@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { eventsService } from "@/services/events.service";
+import { useRegistration } from "@/hooks/useRegistration";
 import { Event } from "@/types/types";
 import { toast } from "sonner";
 
@@ -12,6 +13,59 @@ export default function useEventDetail() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  // ✨ Nuevo estado para eventos relacionados
+  const [relatedEvents, setRelatedEvents] = useState<Event[]>([]);
+  const [loadingRelated, setLoadingRelated] = useState(false);
+
+  // ✨ Usar el hook de inscripción
+  const {
+    isRegistering,
+    isRegistered,
+    isAuthenticated,
+    showModal,
+    modalType,
+    initiateRegistration,
+    confirmAction,
+    closeModal,
+  } = useRegistration({
+    eventId,
+    onRegistrationSuccess: () => {
+      console.log("Registration successful, event updated");
+    },
+    onRegistrationError: (error) => {
+      console.error("Registration error in event detail:", error);
+    },
+  });
+
+  // ✨ Función para obtener eventos relacionados
+  const fetchRelatedEvents = async (currentEvent: Event) => {
+    if (!currentEvent.category?.id) {
+      console.log("No category ID found, skipping related events fetch");
+      return;
+    }
+
+    try {
+      setLoadingRelated(true);
+      console.log(
+        "Fetching related events for category:",
+        currentEvent.category.id
+      );
+
+      const related = await eventsService.getRelatedEventsWithFallback(
+        currentEvent.id,
+        currentEvent.category.id,
+        3
+      );
+
+      setRelatedEvents(related);
+      console.log("Related events fetched:", related.length);
+    } catch (error) {
+      console.error("Error fetching related events:", error);
+      setRelatedEvents([]);
+    } finally {
+      setLoadingRelated(false);
+    }
+  };
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -28,9 +82,7 @@ export default function useEventDetail() {
 
         console.log("=== FETCHING EVENT DETAIL ===");
         console.log("Event ID:", eventId);
-        console.log("API Base URL:", process.env.NEXT_PUBLIC_API_URL);
 
-        // ✨ Usar el servicio con el endpoint correcto
         const eventData = await eventsService.getEventById(eventId);
 
         console.log("✅ Event data received successfully:", {
@@ -38,10 +90,14 @@ export default function useEventDetail() {
           title: eventData.title,
           isPublished: eventData.isPublished,
           hasCategory: !!eventData.category,
-          hasOrganizer: !!eventData.organizer,
+          categoryId: eventData.category?.id,
+          categoryName: eventData.category?.name,
         });
 
         setEvent(eventData);
+
+        // ✨ Obtener eventos relacionados después de cargar el evento
+        await fetchRelatedEvents(eventData);
       } catch (error) {
         console.error("❌ Error in fetchEvent:", error);
 
@@ -53,7 +109,6 @@ export default function useEventDetail() {
         setError(errorInstance);
         setEvent(null);
 
-        // ✨ Toast informativo para el usuario
         toast.error("Error al cargar el evento", {
           description: errorInstance.message,
           duration: 4000,
@@ -67,56 +122,23 @@ export default function useEventDetail() {
     fetchEvent();
   }, [eventId]);
 
-  const handleAddToCart = () => {
+  const handleRegistration = async () => {
     if (!event) {
       toast.error("No se puede procesar la acción en este momento");
       return;
     }
 
-    console.log("Adding event to cart/registration:", {
+    console.log("=== HANDLE REGISTRATION ===");
+    console.log("Event data:", {
       id: event.id,
       title: event.title,
       price: event.price,
       requireAcceptance: event.requireAcceptance,
+      isRegistered,
+      isAuthenticated,
     });
 
-    // ✨ Lógica mejorada para agregar al carrito o inscribirse
-    if (event.price > 0) {
-      // Evento de pago - agregar al carrito
-      toast.success("Evento agregado al carrito", {
-        description: `${event.title} - $${event.price} CUP`,
-        duration: 3000,
-      });
-
-      // TODO: Integrar con sistema de carrito real
-      // cartService.addItem({
-      //   eventId: event.id,
-      //   title: event.title,
-      //   price: event.price,
-      //   date: event.date,
-      //   imageUrl: event.imageUrl,
-      // });
-    } else {
-      // Evento gratuito - inscripción directa
-      if (event.requireAcceptance) {
-        toast.success("Solicitud de inscripción enviada", {
-          description: `Tu solicitud para ${event.title} está pendiente de aprobación`,
-          duration: 4000,
-        });
-      } else {
-        toast.success("¡Inscripción exitosa!", {
-          description: `Te has inscrito a ${event.title}`,
-          duration: 3000,
-        });
-      }
-
-      // TODO: Integrar con sistema de inscripciones real
-      // registrationService.register({
-      //   eventId: event.id,
-      //   userId: currentUser.id,
-      //   requiresApproval: event.requireAcceptance,
-      // });
-    }
+    initiateRegistration();
   };
 
   const refreshEvent = async () => {
@@ -127,6 +149,9 @@ export default function useEventDetail() {
       const eventData = await eventsService.getEventById(eventId);
       setEvent(eventData);
       setError(null);
+
+      // ✨ Refrescar eventos relacionados también
+      await fetchRelatedEvents(eventData);
     } catch (error) {
       console.error("Error refreshing event:", error);
       const errorInstance =
@@ -141,8 +166,21 @@ export default function useEventDetail() {
     event,
     loading,
     error,
-    handleAddToCart,
-    refreshEvent, // ✨ Nueva función para refrescar datos
+    // ✨ Eventos relacionados
+    relatedEvents,
+    loadingRelated,
+    // Estados de inscripción
+    isRegistering,
+    isRegistered,
+    isAuthenticated,
+    // Estados del modal
+    showModal,
+    modalType,
+    // Acciones
+    handleRegistration,
+    confirmAction,
+    closeModal,
+    refreshEvent,
     router,
   };
 }

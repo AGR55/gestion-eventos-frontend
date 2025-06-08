@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { ArrowLeft, ChevronRight } from "lucide-react";
 import { Event } from "@/types/types";
 
 interface EventHeaderProps {

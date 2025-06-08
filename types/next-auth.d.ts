@@ -9,6 +9,7 @@ declare module "next-auth" {
       image?: string | null;
       balance?: number;
       roles?: string[];
+      isOrganizer?: boolean;
     };
     accessToken?: string;
   }
@@ -22,6 +23,7 @@ declare module "next-auth" {
     token?: string;
     roles?: string[];
     balance?: number;
+    isOrganizer?: boolean;
   }
 }
 

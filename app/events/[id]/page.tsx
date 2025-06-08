@@ -8,10 +8,11 @@ import { EventHeader } from "./components/EventHeader";
 import EventInfo from "./components/EventInfo";
 import EventActions from "./components/EventActions";
 import RelatedEvents from "./components/RelatedEvents";
-import { ArrowLeft, AlertTriangle } from "lucide-react";
+import { ArrowLeft, AlertTriangle, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { getEventDateInfo } from "@/lib/date-utils";
+import { ConfirmationModal } from "@/components/ui/confirmation-modal";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -19,7 +20,22 @@ const fadeIn = {
 };
 
 export default function EventDetailPage() {
-  const { event, loading, handleAddToCart, router } = useEventDetail();
+  const {
+    event,
+    loading,
+    error,
+    relatedEvents, // ✨ Agregar
+    loadingRelated, // ✨ Agregar
+    isRegistering,
+    isRegistered,
+    isAuthenticated,
+    showModal,
+    modalType,
+    handleRegistration,
+    confirmAction,
+    closeModal,
+    router,
+  } = useEventDetail();
 
   if (loading) {
     return (
@@ -123,7 +139,10 @@ export default function EventDetailPage() {
             <EventActions
               event={event}
               dateInfo={dateInfo}
-              onAddToCart={handleAddToCart}
+              onRegistration={handleRegistration} // ✨ Cambiar prop
+              isRegistering={isRegistering} // ✨ Agregar props
+              isRegistered={isRegistered}
+              isAuthenticated={isAuthenticated}
             />
           </motion.div>
         </div>
@@ -150,21 +169,34 @@ export default function EventDetailPage() {
               </div>
 
               <Button
-                onClick={handleAddToCart}
-                disabled={dateInfo.isPast || !event.isPublished}
+                onClick={handleRegistration} // ✨ Cambiar función
+                disabled={
+                  dateInfo.isPast || !event.isPublished || isRegistering
+                }
                 className={`w-full h-12 font-bold rounded-xl mb-4 ${
                   dateInfo.isPast || !event.isPublished
                     ? "bg-gray-600/50 text-gray-400"
+                    : isRegistered
+                    ? "bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
                     : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
                 }`}
               >
-                {dateInfo.isPast
-                  ? "Evento Finalizado"
-                  : !event.isPublished
-                  ? "No Disponible"
-                  : event.price > 0
-                  ? "Comprar Entrada"
-                  : "Inscribirse Gratis"}
+                {isRegistering ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Procesando...
+                  </>
+                ) : dateInfo.isPast ? (
+                  "Evento Finalizado"
+                ) : !event.isPublished ? (
+                  "No Disponible"
+                ) : isRegistered ? (
+                  "Cancelar Inscripción"
+                ) : event.price > 0 ? (
+                  "Inscribirse"
+                ) : (
+                  "Inscribirse Gratis"
+                )}
               </Button>
 
               <div className="space-y-2 text-sm text-gray-400">
@@ -176,11 +208,26 @@ export default function EventDetailPage() {
           </div>
         </div>
 
-        {/* Eventos relacionados */}
+        {/* Eventos relacionados - ✨ Actualizar props */}
         <div className="mt-16">
-          <RelatedEvents events={[]} />
+          <RelatedEvents
+            events={relatedEvents}
+            loading={loadingRelated}
+            categoryName={event.category?.name}
+          />
         </div>
       </div>
+
+      {/* ✨ Modal de Confirmación */}
+      <ConfirmationModal
+        isOpen={showModal}
+        onClose={closeModal}
+        onConfirm={confirmAction}
+        event={event}
+        isRegistering={isRegistering}
+        isAuthenticated={isAuthenticated}
+        actionType={modalType}
+      />
     </div>
   );
 }

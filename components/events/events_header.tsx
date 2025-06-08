@@ -96,7 +96,7 @@ export function EventsHeader({
       </motion.div>
 
       {/* Barra de búsqueda */}
-      <motion.div variants={fadeIn} className="max-w-2xl mx-auto">
+      {/*<motion.div variants={fadeIn} className="max-w-2xl mx-auto">
         <form onSubmit={handleSearch} className="relative">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -114,10 +114,10 @@ export function EventsHeader({
               Buscar
             </Button>
           </div>
-        </form>
+        </form>*/}
 
-        {/* Sugerencias de búsqueda */}
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
+      {/* Sugerencias de búsqueda */}
+      {/*<div className="mt-4 flex flex-wrap justify-center gap-2">
           <span className="text-gray-400 text-sm">Búsquedas populares:</span>
           {["Tecnología", "Música", "Arte", "Networking", "Workshop"].map(
             (tag) => (

@@ -62,22 +62,6 @@ export default function EventsPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <div className="pt-20">
         <div className="container mx-auto px-4 py-8">
-          {/* Header */}
-          <EventsHeader
-            totalEvents={pagination.totalRecords}
-            onSearch={searchEvents}
-            currentSearch={filters.search}
-          />
-
-          {/* Filtros */}
-          <EventFilters
-            categories={categories}
-            filters={filters}
-            onApplyFilters={applyFilters}
-            onClearFilters={clearFilters}
-            onFilterByCategory={filterByCategory}
-          />
-
           {/* Información de paginación */}
           <div className="flex justify-between items-center mb-6">
             <div className="text-gray-400 text-sm">

@@ -15,6 +15,26 @@ interface EventCardProps {
 }
 
 export function EventCard({ event }: EventCardProps) {
+  // ✨ Debug del organizador
+  console.log("=== EVENT CARD DEBUG ===");
+  console.log("Event ID:", event.id);
+  console.log("Event title:", event.title);
+  console.log("Organizer object:", event.organizer);
+  console.log(
+    "Organizer keys:",
+    event.organizer ? Object.keys(event.organizer) : "No organizer"
+  );
+
+  if (event.organizer) {
+    console.log("Organizer details:", {
+      id: event.organizer.id,
+      email: event.organizer.email,
+      name: event.organizer.name,
+      // Log todas las propiedades
+      allProps: Object.entries(event.organizer),
+    });
+  }
+
   const [isFavorite, setIsFavorite] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -53,10 +73,47 @@ export function EventCard({ event }: EventCardProps) {
     );
   };
 
-  // ✨ Protecciones para valores null
+  // ✨ Protecciones mejoradas para valores null/undefined
   const categoryName = event.category?.name || "Sin categoría";
-  const organizerName = event.organizer?.userName || "Organizador desconocido";
-  const eventImage = event.imageUrl || "/api/placeholder/400/300";
+  const organizerName = event.organizer?.name || "Organizador";
+  const organizerInitial = organizerName.charAt(0).toUpperCase();
+
+  // ✨ Función helper para construir URL de imagen segura
+  const getEventImage = (imageUrl: string | null | undefined): string => {
+    // Si no hay imagen, usar placeholder
+    if (!imageUrl) {
+      return "/api/placeholder/400/300";
+    }
+
+    // Si ya es una URL completa (empieza con http/https), usarla directamente
+    if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+      return imageUrl;
+    }
+
+    // Si empieza con /api/ (placeholder), usarla directamente
+    if (imageUrl.startsWith("/api/")) {
+      return imageUrl;
+    }
+
+    // Si no empieza con /, agregar /
+    const cleanImageUrl = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
+
+    // Construir URL completa solo si tenemos un backend URL válido
+    const baseUrl =
+      process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
+      "http://localhost:8080";
+
+    try {
+      // Validar que se pueda construir una URL válida
+      new URL(cleanImageUrl, baseUrl);
+      return `${baseUrl}${cleanImageUrl}`;
+    } catch (error) {
+      console.warn("Invalid image URL, using placeholder:", imageUrl);
+      return "/api/placeholder/400/300";
+    }
+  };
+
+  const eventImage = getEventImage(event.imageUrl);
 
   return (
     <motion.div
@@ -169,11 +226,11 @@ export function EventCard({ event }: EventCardProps) {
               </div>
             </div>
 
-            {/* Organizador */}
+            {/* Organizador - ✨ Sección corregida */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center">
                 <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                  {organizerName.charAt(0).toUpperCase()}
+                  {organizerInitial}
                 </div>
                 <div className="ml-2">
                   <p className="text-white text-sm font-medium">

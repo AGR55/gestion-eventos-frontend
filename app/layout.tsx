@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme_provider";
 import { Navbar } from "@/components/ui/navbar/navbar";
 import { Footer } from "@/components/ui/footer/footer";
 import { EventsProvider } from "@/contexts/EventsContext";
+import { Providers } from "./providers";
 
 // Configuración de la fuente principal con múltiples pesos
 /*const jakarta = Plus_Jakarta_Sans({

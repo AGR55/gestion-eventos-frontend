@@ -33,26 +33,6 @@ export function EventFormActions({
           </>
         )}
       </Button>
-
-      <Button
-        type="button"
-        variant="outline"
-        className="border-gray-700 text-gray-300 hover:bg-gray-800 h-12"
-        onClick={onPreview}
-        disabled={isLoading}
-      >
-        <Eye className="h-5 w-5 mr-2" />
-        Vista previa
-      </Button>
-
-      <Button
-        type="button"
-        variant="ghost"
-        className="text-gray-400 hover:text-gray-300 hover:bg-gray-800 h-12"
-        disabled={isLoading}
-      >
-        Guardar borrador
-      </Button>
     </div>
   );
 }
