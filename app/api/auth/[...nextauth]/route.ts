@@ -12,39 +12,96 @@ const handler = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          console.error("Missing credentials");
+          return null;
+        }
+
         try {
+          console.log("Attempting login with:", credentials.email);
+          console.log("API URL:", process.env.NEXT_PUBLIC_API_URL);
+
           const response = await fetch(
             `${process.env.NEXT_PUBLIC_API_URL}/Auth/login`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+              },
               body: JSON.stringify({
-                email: credentials?.email,
-                password: credentials?.password,
+                email: credentials.email,
+                password: credentials.password,
               }),
             }
           );
 
+          console.log("Response status:", response.status);
+
           const data = await response.json();
+          console.log("Response data:", data);
 
           if (!response.ok) {
+            if (response.status === 401) {
+              console.error("Invalid credentials");
+              return null;
+            }
+
             if (data.code === "EmailNotVerified") {
               throw new Error("EMAIL_NOT_VERIFIED");
             }
-            throw new Error(data.message || "Error de autenticación");
+
+            const errorMessage =
+              data.message || data.error || `HTTP ${response.status}`;
+            console.error("Auth error:", errorMessage);
+            return null;
           }
 
-          return {
-            id: data.id || data.userId,
-            name: data.username || data.name,
-            email: data.email,
-            image: data.profileImage,
+          if (!data || typeof data !== "object") {
+            console.error("Invalid response format");
+            return null;
+          }
+
+          const userData = data.user;
+          const userId = userData?.id || data.id;
+          const userEmail = userData?.email || data.email || credentials.email;
+          const userName =
+            userData?.userName ||
+            userData?.username ||
+            data.username ||
+            data.name ||
+            userEmail.split("@")[0];
+
+          if (!userId) {
+            console.error("Missing user ID in response. User data:", userData);
+            return null;
+          }
+
+          const isOrganizer =
+            data.roles &&
+            (data.roles.includes("Organizer") ||
+              data.roles.includes("Admin") ||
+              data.roles.includes("organizer") ||
+              data.roles.includes("admin"));
+
+          const user = {
+            id: String(userId),
+            name: userName,
+            email: userEmail,
+            image: userData?.profileImage || data.profileImage || null,
             token: data.token,
-            isOrganizer: data.isOrganizer || false, // Campo agregado
+            isOrganizer: Boolean(isOrganizer),
+            balance: userData?.balance || 0, // ✨ Nuevo campo
           };
+
+          console.log("Returning user:", user);
+          return user;
         } catch (error) {
           console.error("Auth error:", error);
-          throw error;
+          if (error instanceof Error) {
+            throw error;
+          }
+          return null;
         }
       },
     }),
@@ -62,27 +119,36 @@ const handler = NextAuth({
     error: "/auth",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
-        token.accessToken = user.token;
         token.id = user.id;
-        token.isOrganizer = user.isOrganizer; // Agregar isOrganizer al token
+        token.accessToken = user.token;
+        token.isOrganizer = user.isOrganizer;
+        token.balance = user.balance; // ✨ Nuevo campo
       }
       return token;
     },
     async session({ session, token }) {
-      if (session?.user) {
+      if (session?.user && token) {
         session.user.id = token.id as string;
         session.accessToken = token.accessToken as string;
-        session.user.isOrganizer = token.isOrganizer as boolean; // Agregar al session
+        session.user.isOrganizer = token.isOrganizer as boolean;
+        session.user.balance = token.balance as number;
       }
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Permite redirecciones relativas o al mismo origen
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 días
   },
+  debug: process.env.NODE_ENV === "development",
   secret: process.env.NEXTAUTH_SECRET,
 });
 
@@ -97,7 +163,7 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      isOrganizer?: boolean; // Nuevo campo
+      isOrganizer?: boolean;
     };
     accessToken?: string;
   }
@@ -105,7 +171,7 @@ declare module "next-auth" {
   interface User {
     id: string;
     token?: string;
-    isOrganizer?: boolean; // Nuevo campo
+    isOrganizer?: boolean;
   }
 }
 
@@ -113,6 +179,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     accessToken?: string;
-    isOrganizer?: boolean; // Nuevo campo
+    isOrganizer?: boolean;
   }
 }

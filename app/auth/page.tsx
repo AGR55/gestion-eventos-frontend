@@ -29,8 +29,8 @@ export default function AuthPage() {
             <Image
               alt="event_background"
               src="/auth.webp"
-              layout="fill"
-              objectFit="cover"
+              fill
+              style={{ objectFit: "cover" }}
               className="brightness-75"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-[#111E27]/80 to-transparent"></div>

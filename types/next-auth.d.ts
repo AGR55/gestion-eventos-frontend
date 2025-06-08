@@ -21,6 +21,7 @@ declare module "next-auth" {
     balance?: number;
     token?: string;
     roles?: string[];
+    balance?: number;
   }
 }
 

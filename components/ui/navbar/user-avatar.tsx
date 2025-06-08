@@ -71,14 +71,14 @@ export const UserAvatar = () => {
           <>
             <DropdownMenuSeparator className="bg-gray-700" />
             <DropdownMenuItem
-              onClick={() => router.push("/organizer/create-event")}
+              onClick={() => router.push("/event/create")}
               className="text-cyan-400 hover:text-cyan-300 hover:bg-gray-800 cursor-pointer"
             >
               <Plus className="h-4 w-4 mr-2" />
               Crear Evento
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => router.push("/organizer/my-events")}
+              onClick={() => router.push("/event/list")}
               className="text-cyan-400 hover:text-cyan-300 hover:bg-gray-800 cursor-pointer"
             >
               <Calendar className="h-4 w-4 mr-2" />

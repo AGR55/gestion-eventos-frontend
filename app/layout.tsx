@@ -5,6 +5,7 @@ import { AuthProvider } from "@/components/providers/auth-provider";
 import { ThemeProvider } from "@/components/theme_provider";
 import { Navbar } from "@/components/ui/navbar/navbar";
 import { Footer } from "@/components/ui/footer/footer";
+import { EventsProvider } from "@/contexts/EventsContext";
 
 // Configuración de la fuente principal con múltiples pesos
 /*const jakarta = Plus_Jakarta_Sans({
@@ -40,7 +41,7 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <Navbar />
-            {children}
+            <EventsProvider>{children}</EventsProvider>
           </ThemeProvider>
           <Footer />
         </AuthProvider>
