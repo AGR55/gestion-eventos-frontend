@@ -171,7 +171,7 @@ export default function AboutPage() {
                 transition={{ duration: 1.2 }}
               >
                 <Image
-                  src="/images/about-hero.jpg"
+                  src="/collage.webp"
                   alt="Event collage showcasing vibrant experiences"
                   fill
                   className="object-cover"
@@ -312,7 +312,7 @@ export default function AboutPage() {
                 {/* Imagen principal */}
                 <div className="relative h-[500px] rounded-2xl overflow-hidden shadow-2xl border border-gray-700/50">
                   <Image
-                    src="/images/about-mission.jpg"
+                    src="/mission.png"
                     alt="Our mission in action"
                     fill
                     className="object-cover"

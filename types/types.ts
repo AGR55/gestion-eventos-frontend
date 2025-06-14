@@ -78,7 +78,7 @@ export interface Event {
   price: number;
   organizer: {
     id: string;
-    userName: string;
+    name: string;
     email: string;
     balance: number;
   } | null;

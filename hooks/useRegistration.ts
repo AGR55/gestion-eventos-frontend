@@ -17,6 +17,7 @@ export function useRegistration({
   const [isRegistering, setIsRegistering] = useState(false);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingRegistration, setCheckingRegistration] = useState(false); // ✨ Nuevo estado
 
   // ✨ Estados para el modal
   const [showModal, setShowModal] = useState(false);
@@ -49,20 +50,37 @@ export function useRegistration({
 
       console.log("Authentication result:", isAuth);
 
-      if (isAuth) {
+      if (isAuth && eventId) {
         await checkRegistrationStatus();
+      } else {
+        // Si no está autenticado, asegurar que isRegistered sea false
+        setIsRegistered(false);
       }
     };
 
     checkAuth();
   }, [session, status, eventId]);
 
+  // ✨ Función mejorada para verificar estado de inscripción
   const checkRegistrationStatus = async () => {
+    if (!eventId) return;
+
     try {
-      const userRegistrations = await registrationService.getMyRegistrations();
-      setIsRegistered(userRegistrations.includes(eventId));
+      setCheckingRegistration(true);
+      console.log("=== CHECKING REGISTRATION STATUS ===");
+      console.log("Event ID:", eventId);
+
+      const isUserRegistered =
+        await registrationService.isUserRegisteredToEvent(eventId);
+      setIsRegistered(isUserRegistered);
+
+      console.log("Registration status updated:", isUserRegistered);
     } catch (error) {
       console.error("Error checking registration status:", error);
+      // En caso de error, asumir que no está registrado
+      setIsRegistered(false);
+    } finally {
+      setCheckingRegistration(false);
     }
   };
 
@@ -179,10 +197,18 @@ export function useRegistration({
     }
   };
 
+  // ✨ Función para refrescar el estado de inscripción
+  const refreshRegistrationStatus = async () => {
+    if (isAuthenticated && eventId) {
+      await checkRegistrationStatus();
+    }
+  };
+
   return {
     isRegistering,
     isRegistered,
     isAuthenticated,
+    checkingRegistration, // ✨ Nuevo estado
     // ✨ Modal states
     showModal,
     modalType,
@@ -190,9 +216,9 @@ export function useRegistration({
     initiateRegistration,
     confirmAction,
     closeModal,
+    refreshRegistrationStatus, // ✨ Nueva función
     // Legacy (mantener compatibilidad)
     registerToEvent: initiateRegistration,
     unregisterFromEvent: initiateRegistration,
-    refreshRegistrationStatus: checkRegistrationStatus,
   };
 }

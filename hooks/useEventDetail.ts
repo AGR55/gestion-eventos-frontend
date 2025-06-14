@@ -13,7 +13,6 @@ export default function useEventDetail() {
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  // ✨ Nuevo estado para eventos relacionados
   const [relatedEvents, setRelatedEvents] = useState<Event[]>([]);
   const [loadingRelated, setLoadingRelated] = useState(false);
 
@@ -22,15 +21,19 @@ export default function useEventDetail() {
     isRegistering,
     isRegistered,
     isAuthenticated,
+    checkingRegistration, // ✨ Nuevo estado
     showModal,
     modalType,
     initiateRegistration,
     confirmAction,
     closeModal,
+    refreshRegistrationStatus, // ✨ Nueva función
   } = useRegistration({
     eventId,
     onRegistrationSuccess: () => {
-      console.log("Registration successful, event updated");
+      console.log("Registration successful, refreshing status");
+      // ✨ Refrescar estado después de inscripción exitosa
+      refreshRegistrationStatus();
     },
     onRegistrationError: (error) => {
       console.error("Registration error in event detail:", error);
@@ -152,6 +155,9 @@ export default function useEventDetail() {
 
       // ✨ Refrescar eventos relacionados también
       await fetchRelatedEvents(eventData);
+
+      // ✨ Refrescar estado de inscripción
+      await refreshRegistrationStatus();
     } catch (error) {
       console.error("Error refreshing event:", error);
       const errorInstance =
@@ -173,6 +179,7 @@ export default function useEventDetail() {
     isRegistering,
     isRegistered,
     isAuthenticated,
+    checkingRegistration, // ✨ Nuevo estado
     // Estados del modal
     showModal,
     modalType,
@@ -181,6 +188,7 @@ export default function useEventDetail() {
     confirmAction,
     closeModal,
     refreshEvent,
+    refreshRegistrationStatus, // ✨ Nueva función
     router,
   };
 }

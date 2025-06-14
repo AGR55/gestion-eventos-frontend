@@ -15,26 +15,6 @@ interface EventCardProps {
 }
 
 export function EventCard({ event }: EventCardProps) {
-  // ✨ Debug del organizador
-  console.log("=== EVENT CARD DEBUG ===");
-  console.log("Event ID:", event.id);
-  console.log("Event title:", event.title);
-  console.log("Organizer object:", event.organizer);
-  console.log(
-    "Organizer keys:",
-    event.organizer ? Object.keys(event.organizer) : "No organizer"
-  );
-
-  if (event.organizer) {
-    console.log("Organizer details:", {
-      id: event.organizer.id,
-      email: event.organizer.email,
-      name: event.organizer.name,
-      // Log todas las propiedades
-      allProps: Object.entries(event.organizer),
-    });
-  }
-
   const [isFavorite, setIsFavorite] = useState(false);
 
   const formatDate = (dateString: string) => {
@@ -80,31 +60,24 @@ export function EventCard({ event }: EventCardProps) {
 
   // ✨ Función helper para construir URL de imagen segura
   const getEventImage = (imageUrl: string | null | undefined): string => {
-    // Si no hay imagen, usar placeholder
     if (!imageUrl) {
       return "/api/placeholder/400/300";
     }
 
-    // Si ya es una URL completa (empieza con http/https), usarla directamente
     if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
       return imageUrl;
     }
 
-    // Si empieza con /api/ (placeholder), usarla directamente
     if (imageUrl.startsWith("/api/")) {
       return imageUrl;
     }
 
-    // Si no empieza con /, agregar /
     const cleanImageUrl = imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`;
-
-    // Construir URL completa solo si tenemos un backend URL válido
     const baseUrl =
       process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
       "http://localhost:8080";
 
     try {
-      // Validar que se pueda construir una URL válida
       new URL(cleanImageUrl, baseUrl);
       return `${baseUrl}${cleanImageUrl}`;
     } catch (error) {
@@ -119,17 +92,19 @@ export function EventCard({ event }: EventCardProps) {
     <motion.div
       whileHover={{ y: -8, scale: 1.02 }}
       transition={{ duration: 0.3 }}
-      className="group"
+      className="group w-full"
     >
       <Link href={`/events/${event.id}`}>
-        <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700/50 hover:border-cyan-500/30 transition-all duration-300">
-          {/* Imagen del evento */}
-          <div className="relative h-48 overflow-hidden">
+        {/* ✨ Contenedor con altura fija */}
+        <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700/50 hover:border-cyan-500/30 transition-all duration-300 h-[520px] flex flex-col">
+          {/* ✨ Imagen con altura fija */}
+          <div className="relative h-48 w-full overflow-hidden flex-shrink-0">
             <Image
               src={eventImage}
               alt={event.title}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-500"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
 
             {/* Overlay con fecha */}
@@ -150,7 +125,7 @@ export function EventCard({ event }: EventCardProps) {
                   event.price > 0
                     ? "bg-gradient-to-r from-green-500 to-emerald-500"
                     : "bg-gradient-to-r from-cyan-500 to-blue-500"
-                } text-white font-bold`}
+                } text-white font-bold text-xs px-2 py-1`}
               >
                 {event.price > 0 ? `$${event.price}` : "GRATIS"}
               </Badge>
@@ -180,10 +155,10 @@ export function EventCard({ event }: EventCardProps) {
             )}
           </div>
 
-          {/* Contenido de la tarjeta */}
-          <div className="p-6">
+          {/* ✨ Contenido con flex-grow para ocupar el espacio restante */}
+          <div className="p-4 flex-grow flex flex-col">
             {/* Categoría */}
-            <div className="mb-3">
+            <div className="mb-2 flex-shrink-0">
               <Badge
                 variant="outline"
                 className="text-xs border-gray-600/50 text-gray-400"
@@ -192,33 +167,37 @@ export function EventCard({ event }: EventCardProps) {
               </Badge>
             </div>
 
-            {/* Título */}
-            <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-cyan-400 transition-colors">
-              {event.title}
-            </h3>
+            {/* ✨ Título con altura fija */}
+            <div className="h-14 flex-shrink-0 mb-2">
+              <h3 className="text-lg font-bold text-white line-clamp-2 group-hover:text-cyan-400 transition-colors leading-tight">
+                {event.title}
+              </h3>
+            </div>
 
-            {/* Descripción */}
-            <p className="text-gray-400 text-sm mb-4 line-clamp-2">
-              {event.description}
-            </p>
+            {/* ✨ Descripción con altura fija */}
+            <div className="h-10 flex-shrink-0 mb-3">
+              <p className="text-gray-400 text-sm line-clamp-2 leading-tight">
+                {event.description}
+              </p>
+            </div>
 
-            {/* Información del evento */}
-            <div className="space-y-2 mb-4">
+            {/* ✨ Información del evento con altura fija */}
+            <div className="space-y-1 mb-3 flex-shrink-0 h-16">
               <div className="flex items-center text-gray-400 text-sm">
-                <Calendar className="h-4 w-4 mr-2 text-cyan-400" />
-                <span>
-                  {dateInfo.time} • {dateInfo.fullDate}
+                <Calendar className="h-4 w-4 mr-2 text-cyan-400 flex-shrink-0" />
+                <span className="truncate">
+                  {dateInfo.time} • {dateInfo.day} {dateInfo.month}
                 </span>
               </div>
 
               <div className="flex items-center text-gray-400 text-sm">
-                <MapPin className="h-4 w-4 mr-2 text-purple-400" />
+                <MapPin className="h-4 w-4 mr-2 text-purple-400 flex-shrink-0" />
                 <span className="truncate">{event.address}</span>
               </div>
 
               <div className="flex items-center text-gray-400 text-sm">
-                <Users className="h-4 w-4 mr-2 text-green-400" />
-                <span>
+                <Users className="h-4 w-4 mr-2 text-green-400 flex-shrink-0" />
+                <span className="truncate">
                   {event.limitParticipants > 0
                     ? `Hasta ${event.limitParticipants} personas`
                     : "Capacidad ilimitada"}
@@ -226,40 +205,29 @@ export function EventCard({ event }: EventCardProps) {
               </div>
             </div>
 
-            {/* Organizador - ✨ Sección corregida */}
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+            {/* ✨ Espaciador para empujar el organizador hacia abajo */}
+            <div className="flex-grow"></div>
+
+            {/* ✨ Organizador siempre en la parte inferior */}
+            <div className="flex items-center justify-between flex-shrink-0 mt-auto">
+              <div className="flex items-center min-w-0 flex-1">
+                <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                   {organizerInitial}
                 </div>
-                <div className="ml-2">
-                  <p className="text-white text-sm font-medium">
+                <div className="ml-2 min-w-0 flex-1">
+                  <p className="text-white text-sm font-medium truncate">
                     {organizerName}
                   </p>
                   <p className="text-gray-400 text-xs">Organizador</p>
                 </div>
               </div>
 
-              {/* Rating mock */}
-              <div className="flex items-center">
+              {/* Rating */}
+              <div className="flex items-center flex-shrink-0 ml-2">
                 <Star className="h-4 w-4 text-yellow-400 fill-current" />
                 <span className="text-gray-400 text-sm ml-1">4.8</span>
               </div>
             </div>
-
-            {/* Acción rápida */}
-            {!isEventPast && (
-              <Button
-                onClick={handleQuickAction}
-                className={`w-full h-10 font-semibold rounded-xl transition-all duration-300 ${
-                  event.price > 0
-                    ? "bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                    : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
-                } text-white`}
-              >
-                {event.price > 0 ? "Añadir al carrito" : "Inscribirse gratis"}
-              </Button>
-            )}
           </div>
         </div>
       </Link>

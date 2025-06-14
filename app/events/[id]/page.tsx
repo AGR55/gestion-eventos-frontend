@@ -24,11 +24,12 @@ export default function EventDetailPage() {
     event,
     loading,
     error,
-    relatedEvents, // ✨ Agregar
-    loadingRelated, // ✨ Agregar
+    relatedEvents,
+    loadingRelated,
     isRegistering,
     isRegistered,
     isAuthenticated,
+    checkingRegistration, // ✨ Nuevo estado
     showModal,
     modalType,
     handleRegistration,
@@ -169,9 +170,12 @@ export default function EventDetailPage() {
               </div>
 
               <Button
-                onClick={handleRegistration} // ✨ Cambiar función
+                onClick={handleRegistration}
                 disabled={
-                  dateInfo.isPast || !event.isPublished || isRegistering
+                  dateInfo.isPast ||
+                  !event.isPublished ||
+                  isRegistering ||
+                  checkingRegistration // ✨ Deshabilitar mientras verifica inscripción
                 }
                 className={`w-full h-12 font-bold rounded-xl mb-4 ${
                   dateInfo.isPast || !event.isPublished
@@ -185,6 +189,11 @@ export default function EventDetailPage() {
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Procesando...
+                  </>
+                ) : checkingRegistration ? ( // ✨ Estado de verificación
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Verificando...
                   </>
                 ) : dateInfo.isPast ? (
                   "Evento Finalizado"
@@ -209,13 +218,13 @@ export default function EventDetailPage() {
         </div>
 
         {/* Eventos relacionados - ✨ Actualizar props */}
-        <div className="mt-16">
+        {/*<div className="mt-16">
           <RelatedEvents
             events={relatedEvents}
             loading={loadingRelated}
             categoryName={event.category?.name}
           />
-        </div>
+        </div>*/}
       </div>
 
       {/* ✨ Modal de Confirmación */}

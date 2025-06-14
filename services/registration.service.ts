@@ -10,12 +10,84 @@ export interface RegistrationResponse {
 class RegistrationService {
   private baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
+  // ✨ Método para obtener las inscripciones del usuario
+  async getMyRegistrations(): Promise<string[]> {
+    try {
+      console.log("=== GETTING USER REGISTRATIONS ===");
+
+      const token = await this.getAuthToken();
+      if (!token) {
+        console.log("No auth token found, returning empty array");
+        return [];
+      }
+
+      const url = `${this.baseUrl}/UserActions/inscriptions`;
+      console.log("Fetching user registrations from:", url);
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("User registrations response status:", response.status);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.warn("User not authenticated, returning empty array");
+          return [];
+        }
+
+        if (response.status === 404) {
+          console.log("No registrations found for user");
+          return [];
+        }
+
+        throw new Error(`Error al obtener inscripciones: ${response.status}`);
+      }
+
+      const registrations = await response.json();
+      console.log("User registrations received:", registrations);
+
+      // Asegurar que devolvemos un array
+      if (Array.isArray(registrations)) {
+        return registrations;
+      } else {
+        console.warn("Unexpected registration response format:", registrations);
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching user registrations:", error);
+      // En caso de error, devolver array vacío para no romper la UI
+      return [];
+    }
+  }
+
+  // ✨ Método helper para verificar si el usuario está registrado a un evento específico
+  async isUserRegisteredToEvent(eventId: string): Promise<boolean> {
+    try {
+      const registrations = await this.getMyRegistrations();
+      const isRegistered = registrations.includes(eventId);
+
+      console.log("=== CHECK USER REGISTRATION ===");
+      console.log("Event ID:", eventId);
+      console.log("User registrations:", registrations);
+      console.log("Is registered:", isRegistered);
+
+      return isRegistered;
+    } catch (error) {
+      console.error("Error checking user registration:", error);
+      return false;
+    }
+  }
+
   async registerToEvent(eventId: string): Promise<RegistrationResponse> {
     try {
       console.log("=== REGISTERING TO EVENT ===");
       console.log("Event ID:", eventId);
 
-      // ✨ Obtener token desde NextAuth
       const token = await this.getAuthToken();
       if (!token) {
         throw new Error("Debes iniciar sesión para inscribirte a un evento");
@@ -121,22 +193,6 @@ class RegistrationService {
       }
 
       throw new Error("Error desconocido al cancelar inscripción");
-    }
-  }
-
-  async getMyRegistrations(): Promise<string[]> {
-    try {
-      const token = await this.getAuthToken();
-      if (!token) {
-        return [];
-      }
-
-      // TODO: Implementar endpoint para obtener inscripciones del usuario
-      console.log("Getting user registrations - endpoint not implemented yet");
-      return [];
-    } catch (error) {
-      console.error("Error getting user registrations:", error);
-      return [];
     }
   }
 

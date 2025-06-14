@@ -238,12 +238,12 @@ export default function EventInfo({ event, dateInfo }: EventInfoProps) {
             <div className="bg-gray-900/50 rounded-xl p-6">
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xl font-bold">
-                  {event.organizer?.userName?.charAt(0).toUpperCase() || "?"}
+                  {event.organizer?.name?.charAt(0).toUpperCase() || "?"}
                 </div>
 
                 <div className="flex-1">
                   <h4 className="text-white font-semibold text-lg mb-2">
-                    {event.organizer?.userName}
+                    {event.organizer?.name}
                   </h4>
 
                   <p className="text-gray-400 mb-4">Organizador de eventos</p>

@@ -1,146 +1,136 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { featured_events } from "@/test-data/featured_events";
-import { FeaturedEventsCard } from "./featured_events_card";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { EventCard } from "@/components/events/event_card";
+import { useEvents } from "@/hooks/useEvents";
+import { Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-export const FeaturedEventsSection = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const totalSlides = featured_events.length;
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+};
 
-  const updateScrollButtons = useCallback(() => {
-    if (!carouselRef.current) return;
+const stagger = {
+  visible: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
-    const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-    setCanScrollLeft(scrollLeft > 0);
+export function FeaturedEventsSection() {
+  const { events, isLoading, error } = useEvents({
+    initialPageSize: 6, // Mostrar 6 eventos destacados
+    autoFetch: true,
+  });
 
-    const isAtEnd = Math.ceil(scrollLeft + clientWidth) >= scrollWidth - 2;
-    setCanScrollRight(!isAtEnd);
+  // ✨ Estado de carga
+  if (isLoading) {
+    return (
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="flex flex-col items-center justify-center py-16"
+      >
+        <Loader2 className="h-12 w-12 text-cyan-400 animate-spin mb-4" />
+        <p className="text-gray-400 text-lg">Cargando eventos destacados...</p>
+      </motion.div>
+    );
+  }
 
-    if (scrollLeft === 0) {
-      setCurrentIndex(0);
-    } else if (isAtEnd) {
-      setCurrentIndex(totalSlides - 1);
-    } else {
-      const cardWidth = 480 + 16;
-      const approximate = Math.round(scrollLeft / cardWidth);
-      setCurrentIndex(Math.min(approximate, totalSlides - 1));
-    }
-  }, [totalSlides]);
+  // ✨ Estado de error
+  if (error) {
+    return (
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="flex flex-col items-center justify-center py-16"
+      >
+        <AlertCircle className="h-12 w-12 text-red-400 mb-4" />
+        <h3 className="text-xl font-semibold text-white mb-2">
+          Error al cargar eventos
+        </h3>
+        <p className="text-gray-400 text-center mb-6 max-w-md">
+          {error.message || "No se pudieron cargar los eventos destacados"}
+        </p>
+        <Button
+          onClick={() => window.location.reload()}
+          variant="outline"
+          className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10"
+        >
+          Intentar de nuevo
+        </Button>
+      </motion.div>
+    );
+  }
 
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    if (carousel) {
-      carousel.addEventListener("scroll", updateScrollButtons);
-      updateScrollButtons();
-
-      return () => carousel.removeEventListener("scroll", updateScrollButtons);
-    }
-  }, [updateScrollButtons]);
-
-  const scrollToIndex = (index: number) => {
-    if (carouselRef.current && index >= 0 && index < totalSlides) {
-      const card = carouselRef.current.children[index] as HTMLElement;
-      const scrollPosition = card.offsetLeft - 20;
-
-      carouselRef.current.scrollTo({
-        left: scrollPosition,
-        behavior: "smooth",
-      });
-
-      setCurrentIndex(index);
-    }
-  };
-
-  const handleNext = () => {
-    scrollToIndex(Math.min(currentIndex + 1, totalSlides - 1));
-  };
-
-  const handlePrev = () => {
-    scrollToIndex(Math.max(currentIndex - 1, 0));
-  };
+  // ✨ Estado sin eventos
+  if (!events || events.length === 0) {
+    return (
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="text-center py-16"
+      >
+        <div className="w-24 h-24 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
+          <AlertCircle className="h-12 w-12 text-gray-400" />
+        </div>
+        <h3 className="text-xl font-semibold text-white mb-2">
+          No hay eventos disponibles
+        </h3>
+        <p className="text-gray-400 mb-6">
+          En este momento no hay eventos destacados para mostrar
+        </p>
+        <Link href="/events">
+          <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600">
+            Ver todos los eventos
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </Link>
+      </motion.div>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
-      <div className="relative">
-        <h1 className="text-4xl font-bold mb-4">Eventos Destacados</h1>
-
-        <div className="relative overflow-hidden">
-          {canScrollLeft && (
-            <div
-              className="absolute left-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
-              style={{
-                background:
-                  "linear-gradient(to right, #111E27 0%, rgba(17, 30, 39, 0) 100%)",
-              }}
-            ></div>
-          )}
-
-          <div
-            ref={carouselRef}
-            className="flex flex-row overflow-x-auto scroll-smooth gap-4 pb-4 hide-scrollbar"
-            style={{
-              msOverflowStyle: "none",
-              scrollbarWidth: "none",
-            }}
-          >
-            <style jsx>{`
-              .hide-scrollbar::-webkit-scrollbar {
-                display: none; /* Chrome, Safari, Opera */
-              }
-            `}</style>
-
-            {featured_events.map((event) => (
-              <div key={event.id.toString()} className="flex-shrink-0">
-                <FeaturedEventsCard event={event} />
-              </div>
-            ))}
-          </div>
-
-          {canScrollRight && (
-            <div
-              className="absolute right-0 top-0 bottom-0 w-20 z-10 pointer-events-none"
-              style={{
-                background:
-                  "linear-gradient(to left, #111E27 0%, rgba(17, 30, 39, 0) 100%)",
-              }}
-            ></div>
-          )}
-        </div>
-
-        <button
-          onClick={handlePrev}
-          disabled={!canScrollLeft}
-          className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-2 rounded-full text-white disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed z-20"
-        >
-          <ChevronLeft size={24} />
-        </button>
-
-        <button
-          onClick={handleNext}
-          disabled={!canScrollRight}
-          className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-2 rounded-full text-white disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed z-20"
-        >
-          <ChevronRight size={24} />
-        </button>
-      </div>
-
-      <div className="flex justify-center gap-2">
-        {featured_events.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => scrollToIndex(index)}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              currentIndex === index ? "bg-cyan-400" : "bg-gray-600"
-            }`}
-            aria-label={`Ir a diapositiva ${index + 1}`}
-          />
+    <div className="space-y-8">
+      {/* ✨ Grid de eventos destacados */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        variants={stagger}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+      >
+        {events.slice(0, 6).map((event, index) => (
+          <motion.div key={event.id} variants={fadeIn} className="w-full">
+            <EventCard event={event} />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
+
+      {/* ✨ Botón para ver más eventos */}
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        variants={fadeIn}
+        className="text-center pt-8"
+      >
+        <Link href="/events">
+          <Button
+            size="lg"
+            className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-cyan-500/25"
+          >
+            Ver todos los eventos
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
+        </Link>
+      </motion.div>
     </div>
   );
-};
+}

@@ -2,6 +2,7 @@
 
 import { FeaturedEventsSection } from "@/components/ui/events/featured_events/featured_events_section";
 import { UpcomingEventsSection } from "@/components/ui/events/upcoming_events/upcoming_events_section";
+import { CategoriesSection } from "@/components/ui/events/categories_section";
 import { MainSection } from "@/components/ui/main_section/main_section";
 import { motion } from "framer-motion";
 import {
@@ -224,7 +225,7 @@ const CtaSection = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/organizers">
+              <Link href="/auth">
                 <Button
                   size="lg"
                   className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-cyan-500/25"
@@ -234,13 +235,13 @@ const CtaSection = () => {
                 </Button>
               </Link>
 
-              <Link href="/contact">
+              <Link href="/events">
                 <Button
                   variant="outline"
                   size="lg"
                   className="border-2 border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10 hover:border-cyan-400 py-4 px-8 rounded-xl transition-all duration-300 font-semibold"
                 >
-                  Contactar soporte
+                  Ver eventos
                 </Button>
               </Link>
             </div>
@@ -317,98 +318,19 @@ const CtaSection = () => {
   );
 };
 
-// Banner de categorías mejorado
-const CategoriesBanner = () => {
-  const categories = [
-    { name: "Música", emoji: "🎵", color: "from-red-500/20 to-pink-500/20" },
-    { name: "Cine", emoji: "🎬", color: "from-blue-500/20 to-purple-500/20" },
-    {
-      name: "Teatro",
-      emoji: "🎭",
-      color: "from-purple-500/20 to-indigo-500/20",
-    },
-    {
-      name: "Gastronomía",
-      emoji: "🍽️",
-      color: "from-orange-500/20 to-red-500/20",
-    },
-    {
-      name: "Cultura",
-      emoji: "🏛️",
-      color: "from-emerald-500/20 to-teal-500/20",
-    },
-    {
-      name: "Tecnología",
-      emoji: "💻",
-      color: "from-cyan-500/20 to-blue-500/20",
-    },
-    { name: "Arte", emoji: "🎨", color: "from-pink-500/20 to-rose-500/20" },
-    {
-      name: "Educación",
-      emoji: "📚",
-      color: "from-yellow-500/20 to-orange-500/20",
-    },
-  ];
-
-  return (
-    <motion.section
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true }}
-      variants={fadeInUp}
-      className="py-12 relative"
-    >
-      <div className="absolute inset-0 bg-gradient-to-r from-gray-900/50 via-gray-800/30 to-gray-900/50 border-y border-gray-800/50"></div>
-
-      <div className="container mx-auto relative z-10">
-        <div className="text-center mb-8">
-          <h3 className="text-lg font-semibold text-white mb-2">
-            Explora por categorías
-          </h3>
-          <p className="text-gray-400">
-            Encuentra eventos que se adapten a tus intereses
-          </p>
-        </div>
-
-        <div className="flex justify-center flex-wrap gap-3">
-          {categories.map((category, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              whileHover={{ scale: 1.05 }}
-            >
-              <Link
-                href={`/events?category=${category.name}`}
-                className={`group bg-gradient-to-r ${category.color} backdrop-blur-sm px-6 py-3 rounded-full text-sm font-medium text-white border border-gray-700/50 hover:border-gray-600/50 transition-all duration-300 flex items-center gap-2 hover:shadow-lg`}
-              >
-                <span className="text-lg">{category.emoji}</span>
-                <span className="group-hover:text-cyan-300 transition-colors">
-                  {category.name}
-                </span>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </motion.section>
-  );
-};
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <div className="max-w-7xl container mx-auto">
-        {/* Hero Section */}
+        {/* ✨ Hero Section */}
         <motion.div initial="hidden" animate="visible" variants={fadeInUp}>
           <MainSection />
         </motion.div>
 
-        {/* Categories Banner */}
-        <CategoriesBanner />
+        {/* ✨ Categories Section con eventos reales */}
+        <CategoriesSection />
 
-        {/* Featured Events */}
+        {/* ✨ Featured Events con datos reales */}
         <motion.section
           className="py-16 px-4"
           initial="hidden"
@@ -441,10 +363,10 @@ export default function Home() {
           <FeaturedEventsSection />
         </motion.section>
 
-        {/* Stats Section */}
+        {/* ✨ Stats Section */}
         <StatsSection />
 
-        {/* Upcoming Events */}
+        {/* ✨ Upcoming Events con datos reales */}
         <motion.section
           className="py-16 px-4"
           initial="hidden"
@@ -477,7 +399,7 @@ export default function Home() {
           <UpcomingEventsSection />
         </motion.section>
 
-        {/* CTA Section */}
+        {/* ✨ CTA Section */}
         <CtaSection />
       </div>
     </div>
